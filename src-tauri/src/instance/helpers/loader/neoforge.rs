@@ -50,6 +50,16 @@ pub async fn install_neoforge_loader(
           let path = format!("{v}/download/installer", v = loader_ver);
           root.join(&path)?
         }
+        SourceType::FastMinecraftMirror => {
+          // FastMinecraftMirror 不提供自定义 NeoForge 安装程序 URL，回退到官方源
+          let official_root =
+            get_download_api(SourceType::Official, ResourceType::NeoforgeInstall)?;
+          let path = format!(
+            "net/neoforged/neoforge/{v}/neoforge-{v}-installer.jar",
+            v = loader_ver
+          );
+          official_root.join(&path)?
+        }
       },
       format!("net.neoforged:neoforge:{}-installer", loader.version),
     )

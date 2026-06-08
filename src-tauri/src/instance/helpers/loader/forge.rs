@@ -75,6 +75,22 @@ pub async fn install_forge_loader(
       &fetch_bmcl_forge_installer_url(root, game_version, loader_ver, loader.branch.as_deref())
         .await?,
     )?,
+    SourceType::FastMinecraftMirror => {
+      // FastMinecraftMirror 不提供自定义 Forge 安装程序 URL，回退到官方源
+      let full_ver = vec![
+        game_version,
+        loader_ver,
+        loader.branch.as_ref().unwrap_or(&"".to_string()),
+      ]
+      .into_iter()
+      .filter(|s| !s.is_empty())
+      .collect::<Vec<_>>()
+      .join("-");
+
+      // 从官方源获取安装程序
+      let official_root = get_download_api(SourceType::Official, ResourceType::ForgeInstall)?;
+      official_root.join(&format!("{full_ver}/forge-{full_ver}-installer.jar"))?
+    }
   };
 
   let installer_coord = format!("net.minecraftforge:forge:{}-installer", loader.version);

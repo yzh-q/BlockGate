@@ -77,6 +77,10 @@ pub async fn get_forge_meta_by_game_version(
           return Ok(meta);
         }
       }
+      SourceType::FastMinecraftMirror => {
+        // FastMinecraftMirror 不提供 Forge 元数据，跳过
+        continue;
+      }
     }
   }
   Err(SJMCLError(String::new()))

@@ -10,6 +10,8 @@ import { GuidedTourProvider } from "@/components/special/guided-tour-provider";
 import SharedModalsProvider from "@/components/special/shared-modals-provider";
 import { LauncherConfigContextProvider } from "@/contexts/config";
 import { GlobalDataContextProvider } from "@/contexts/global-data";
+import { MultiplayerProvider } from "@/contexts/multiplayer";
+import { RoomProvider } from "@/contexts/room";
 import { RoutingHistoryContextProvider } from "@/contexts/routing-history";
 import { TaskContextProvider } from "@/contexts/task";
 import { ToastContextProvider } from "@/contexts/toast";
@@ -20,6 +22,7 @@ import SettingsLayout from "@/layouts/settings-layout";
 import { localeResources } from "@/locales";
 import chakraExtendTheme from "@/styles/chakra-theme";
 import "@/styles/globals.css";
+import "@/styles/pixelated-fonts.css";
 import { isProd } from "@/utils/env";
 import { setupLogger } from "@/utils/logging";
 
@@ -46,7 +49,7 @@ export default function App({ Component, pageProps }: AppProps) {
       });
     }
 
-    // forbid keyboard shortcut in webview: https://github.com/UNIkeEN/SJMCL/issues/163
+    // forbid keyboard shortcut in webview
     document.addEventListener("keydown", (event) => {
       const disabledShortcuts =
         ["F3", "F5", "F7"].includes(event.key) ||
@@ -121,15 +124,19 @@ export default function App({ Component, pageProps }: AppProps) {
               <GuidedTourProvider>
                 <SharedModalsProvider>
                   <TaskContextProvider>
-                    <GlobalEventHandler>
-                      <MainLayout>
-                        <Fade key={router.pathname.split("/")[1] || ""} in>
-                          <SpecLayout>
-                            <Component {...pageProps} />
-                          </SpecLayout>
-                        </Fade>
-                      </MainLayout>
-                    </GlobalEventHandler>
+                    <MultiplayerProvider>
+                      <RoomProvider>
+                        <GlobalEventHandler>
+                          <MainLayout>
+                            <Fade key={router.pathname.split("/")[1] || ""} in>
+                              <SpecLayout>
+                                <Component {...pageProps} />
+                              </SpecLayout>
+                            </Fade>
+                          </MainLayout>
+                        </GlobalEventHandler>
+                      </RoomProvider>
+                    </MultiplayerProvider>
                   </TaskContextProvider>
                 </SharedModalsProvider>
               </GuidedTourProvider>

@@ -2,6 +2,7 @@ use crate::error::{SJMCLError, SJMCLResult};
 use crate::instance::helpers::game_version::compare_game_versions;
 use crate::instance::models::misc::{Instance, ModLoaderType};
 use crate::launcher_config::models::LauncherConfig;
+use crate::storage::load_json_async;
 use crate::utils::fs::get_app_resource_filepath;
 use regex::RegexBuilder;
 use serde::{Deserialize, Deserializer, Serialize};
@@ -12,6 +13,7 @@ use serialize_skip_none_derive::serialize_skip_none;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs;
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
@@ -443,6 +445,103 @@ impl LaunchArgumentTemplate {
       }
     }
     Ok(arguments)
+  }
+}
+
+pub async fn resolve_inherits_from(
+  app: &AppHandle,
+  client_info: McClientInfo,
+  version_dir: &PathBuf,
+) -> SJMCLResult<McClientInfo> {
+  let mut current = client_info;
+  let mut visited = std::collections::HashSet::new();
+  while let Some(inherits_from) = &current.inherits_from {
+    if !visited.insert(inherits_from.clone()) {
+      // 检测到循环继承，停止处理
+      break;
+    }
+    let parent_path = version_dir
+      .parent()
+      .ok_or_else(|| SJMCLError("Failed to get parent directory".to_string()))?
+      .join(inherits_from)
+      .join(format!("{}.json", inherits_from));
+    if !parent_path.exists() {
+      // 找不到继承的版本，停止处理
+      break;
+    }
+    let parent = load_json_async::<McClientInfo>(&parent_path).await?;
+    current = merge_mc_client_info(current, parent);
+  }
+  Ok(current)
+}
+
+fn merge_mc_client_info(child: McClientInfo, parent: McClientInfo) -> McClientInfo {
+  McClientInfo {
+    // 基础信息使用子级的值
+    id: child.id,
+    version: child.version.or(parent.version),
+    priority: child.priority.or(parent.priority),
+    inherits_from: parent.inherits_from, // 继续查找继承链
+    // 优先使用子级的参数，如果没有则使用父级的
+    arguments: child.arguments.or(parent.arguments),
+    minecraft_arguments: child.minecraft_arguments.or(parent.minecraft_arguments),
+    // 优先使用子级的资源索引，如果没有则使用父级的
+    asset_index: if child.asset_index.id != AssetIndexInfo::default().id {
+      child.asset_index
+    } else {
+      parent.asset_index
+    },
+    assets: if !child.assets.is_empty() {
+      child.assets
+    } else {
+      parent.assets
+    },
+    // 下载信息合并，子级优先
+    downloads: {
+      let mut downloads = parent.downloads;
+      downloads.extend(child.downloads);
+      downloads
+    },
+    // 库合并，子级的库放在前面
+    libraries: {
+      let mut libraries = parent.libraries;
+      libraries.extend(child.libraries);
+      libraries
+    },
+    // 日志信息优先使用子级的
+    logging: child.logging,
+    java_version: child.java_version.or(parent.java_version),
+    type_: if !child.type_.is_empty() {
+      child.type_
+    } else {
+      parent.type_
+    },
+    time: if !child.time.is_empty() {
+      child.time
+    } else {
+      parent.time
+    },
+    release_time: if !child.release_time.is_empty() {
+      child.release_time
+    } else {
+      parent.release_time
+    },
+    minimum_launcher_version: if child.minimum_launcher_version != 0 {
+      child.minimum_launcher_version
+    } else {
+      parent.minimum_launcher_version
+    },
+    // patches 合并
+    patches: {
+      let mut patches = parent.patches;
+      patches.extend(child.patches);
+      patches
+    },
+    // 优先使用子级的主类
+    main_class: child.main_class.or(parent.main_class),
+    // 优先使用子级的 jar
+    jar: child.jar.or(parent.jar),
+    client_version: child.client_version.or(parent.client_version),
   }
 }
 

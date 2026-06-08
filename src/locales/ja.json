@@ -1,7 +1,7 @@
 {
   "AboutSettingsPage": {
     "about": {
-      "title": "SJMCLについて",
+      "title": "BlockGate について",
       "settings": {
         "version": {
           "title": "バージョン",
@@ -19,8 +19,8 @@
         "reportIssue": {
           "title": "問題報告"
         },
-        "aboutSJMC": {
-          "title": "上海交通大学 Minecraft クラブ (SJMC) について"
+        "aboutBlockGate": {
+          "title": "BlockGate について"
         }
       }
     },
@@ -58,11 +58,11 @@
       "settings": {
         "copyright": {
           "title": "コピーライト",
-          "description": "© 2024-2025 SJMCL 開発チーム"
+          "description": "© 2024-2025 BlockGate 開発チーム"
         },
         "userAgreement": {
           "title": "利用規約",
-          "url": "https://mc.sjtu.cn/sjmcl/en/docs/tos"
+          "url": "https://blockgate.example.com/tos"
         },
         "openSourceLicense": {
           "title": "オープンソースライセンス",
@@ -186,7 +186,7 @@
       "description": {
         "start": {
           "3rdparty": "この認証ソースは Yggdrasil Connect 仕様提案をサポート",
-          "microsoft": " SJMCL は Microsoft OAuth 2.0 デバイス認証フローをサポート"
+          "microsoft": " BlockGate は Microsoft OAuth 2.0 デバイス認証フローをサポート"
         },
         "next": "次へ進むボタンをクリックし、ログインウィンドウに上記のコードを入力してください。（自動コピー済）"
       },
@@ -481,7 +481,7 @@
       "type": "タイプ"
     },
     "warning": {
-      "mojang": "Mojang によって配布される Java ランタイムは SJMCL によって特定のディレクトリにインストールされます",
+      "mojang": "Mojang によって配布される Java ランタイムは BlockGate によって特定のディレクトリにインストールされます",
       "oracle": "Oracle ソースからのダウンロードにはログインの必要な場合があります"
     }
   },
@@ -510,7 +510,8 @@
           "title": "ダウンロードソースポリシー選択",
           "auto": "スマート選択",
           "official": "公式ソース優先",
-          "mirror": "ミラーソース優先"
+          "mirror": "BMCLAPI優先",
+          "fastMinecraftMirror": "FastMinecraftMirror優先"
         }
       }
     },
@@ -928,7 +929,7 @@
       "settings": {
         "language": {
           "title": "言語（Language）",
-          "communityAck": "SJMCL のローカリゼーションはコミュニティによる提供されました。@LAR73 さんのご協力を感謝いたします"
+          "communityAck": "BlockGate のローカリゼーションはコミュニティによる提供されました。@LAR73 さんのご協力を感謝いたします"
         }
       }
     },
@@ -987,7 +988,7 @@
         "directories": {
           "special": {
             "CURRENT_DIR": "現在フォルダー",
-            "APP_DATA_SUBDIR": "SJMCL データフォルダー",
+            "APP_DATA_SUBDIR": "BlockGate データフォルダー",
             "OFFICIAL_DIR": "公式ランチャーフォルダー"
           }
         }
@@ -1097,6 +1098,7 @@
       "launch": "起動",
       "instances": "ゲーム",
       "accounts": "アカウント",
+      "multiplayer": "マルチプレイ",
       "discover": "ディスカバー",
       "search": "メタサーチ",
       "settings": "設定"
@@ -1113,7 +1115,7 @@
         },
         "SJMC": {
           "title": "上海交通大学 Minecraft クラブ（SJMC）",
-          "url": "https://mc.sjtu.cn"
+          "url": "https://blockgate.example.com"
         }
       }
     },
@@ -1138,8 +1140,8 @@
     "top": {
       "settings": {
         "LauncherDocs": {
-          "title": "SJMC Launcher ドキュメント（中国語）",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs"
+          "title": "BlockGate Launcher ドキュメント（中国語）",
+          "url": "https://blockgate.example.com/sjmcl/zh/docs"
         }
       }
     }
@@ -1444,7 +1446,7 @@
       "neoforge": "NeoForge",
       "authlibInjector": "Authlib Injector",
       "github": "GitHub",
-      "sjmclapi": "SJMC Launcher API"
+      "blockgateapi": "BlockGate Launcher API"
     }
   },
   "ReLoginPlayerModal": {
@@ -1464,8 +1466,8 @@
   },
   "RestartForUpdateConfirmDialog": {
     "title": "ランチャー更新",
-    "body": "新しいバージョンのダウンロードが完了しました。SJMCL を再起動して更新を完了してください",
-    "bodyMSI": "新しいバージョンのダウンロードが完了しました。インストールをクリックすると SJMCL が閉じ、インストーラーが実行されます",
+    "body": "新しいバージョンのダウンロードが完了しました。BlockGate を再起動して更新を完了してください",
+    "bodyMSI": "新しいバージョンのダウンロードが完了しました。インストールをクリックすると BlockGate が閉じ、インストーラーが実行されます",
     "button": {
       "restart": "再起動",
       "install": "インストール",
@@ -2472,9 +2474,9 @@
   },
   "StarUsModal": {
     "header": {
-      "title": "GitHub で SJMCL をスター"
+      "title": "GitHub で BlockGate をスター"
     },
-    "body": "SJMCL にご支援をお考えの場合は、GitHub リポジトリへのスターの付与をご検討ください。コミュニティーからの評価は開発チームの重要な指標となりまして、品質向上の原動力となっております。",
+    "body": "BlockGate にご支援をお考えの場合は、GitHub リポジトリへのスターの付与をご検討ください。コミュニティーからの評価は開発チームの重要な指標となりまして、品質向上の原動力となっております。",
     "button": {
       "later": "あとで",
       "starUs": "スターを付与"
@@ -2549,10 +2551,10 @@
       "title": "ようこそ！"
     },
     "body": {
-      "text": "SJMCL をご利用いただき、ありがとうございます。開始前に、必ず下記の<terms>利用規約</terms>をお読みいただき、同意をお願いいたします。"
+      "text": "BlockGate をご利用いただき、ありがとうございます。開始前に、必ず下記の<terms>利用規約</terms>お読みいただき、同意をお願いいたします。"
     },
     "warning": {
-      "unstableVersion": "{{versionLabel}}の SJMCL を使用しています。一部の機能が不安定または開発未完了の可能性があります。使用上の問題や機能の提案を報告いただければ幸いです。"
+      "unstableVersion": "{{versionLabel}}の BlockGate を使用しています。一部の機能が不安定または開発未完了の可能性があります。使用上の問題や機能の提案を報告いただければ幸いです。"
     },
     "button": {
       "exit": "アプリ終了",

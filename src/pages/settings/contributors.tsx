@@ -8,76 +8,16 @@ import { WrapCardGroup } from "@/components/common/wrap-card";
 
 export const CoreContributorsList = [
   {
-    username: "UNIkeEN",
+    username: "BlockGate",
     contribution: "fullStackDev",
   },
   {
-    username: "Reqwey",
+    username: "Developer",
     contribution: "fullStackDev",
   },
   {
-    username: "SundayChen",
+    username: "Contributor",
     contribution: "fullStackDev",
-  },
-  {
-    username: "w1049",
-    contribution: "backendDev",
-  },
-  {
-    username: "Toolmanp",
-    contribution: "backendDev",
-  },
-  {
-    username: "fangtiancheng",
-    contribution: "backendDev",
-  },
-  {
-    username: "ModistAndrew",
-    contribution: "backendDev",
-  },
-  {
-    username: "1357310795",
-    contribution: "frontendDev",
-  },
-  {
-    username: "HsxMark",
-    contribution: "frontendDev",
-  },
-  {
-    username: "baiyuansjtu",
-    contribution: "frontendDev",
-  },
-  {
-    username: "xunying123",
-    contribution: "externalAPI",
-  },
-  {
-    username: "hans362",
-    contribution: "externalAPI",
-  },
-  {
-    username: "ff98sha",
-    contribution: "doc",
-  },
-  {
-    username: "pangbo13",
-    contribution: "cicd",
-  },
-  {
-    username: "Minecrafter-Pythoner",
-    contribution: "cicd",
-  },
-  {
-    username: "hebingchang",
-    contribution: "mascot",
-  },
-  {
-    username: "Neuteria",
-    contribution: "design",
-  },
-  {
-    username: "Stya-hr",
-    contribution: "design",
   },
 ];
 
@@ -92,7 +32,7 @@ const ContributorsPage = () => {
             title: t("ContributorsPage.all"),
             children: (
               <CommonIconButton
-                label="https://github.com/UNIkeEN/SJMCL/graphs/contributors"
+                label="https://github.com/BlockGate/BlockGate/graphs/contributors"
                 icon="external"
                 withTooltip
                 tooltipPlacement="bottom-end"
@@ -100,7 +40,7 @@ const ContributorsPage = () => {
                 h={18}
                 onClick={() =>
                   openUrl(
-                    "https://github.com/UNIkeEN/SJMCL/graphs/contributors"
+                    "https://github.com/BlockGate/BlockGate/graphs/contributors"
                   )
                 }
               />

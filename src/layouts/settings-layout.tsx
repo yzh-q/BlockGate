@@ -4,18 +4,13 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { IconType } from "react-icons";
 import {
-  LuCircleHelp,
   LuCloudDownload,
   LuCoffee,
-  LuFlaskConical,
   LuGamepad2,
-  LuInfo,
   LuPalette,
-  LuRefreshCcw,
   LuSettings,
 } from "react-icons/lu";
 import NavMenu from "@/components/common/nav-menu";
-import { isDev } from "@/utils/env";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -34,11 +29,7 @@ const SettingsLayout: React.FC<SettingsLayoutProps> = ({ children }) => {
       { key: "general", icon: LuSettings },
       { key: "appearance", icon: LuPalette },
       { key: "download", icon: LuCloudDownload },
-      { key: "sync-restore", icon: LuRefreshCcw },
-      { key: "help", icon: LuCircleHelp },
-      { key: "about", icon: LuInfo },
     ],
-    ...(isDev ? [[{ key: "dev-test", icon: LuFlaskConical }]] : []),
   ];
 
   return (

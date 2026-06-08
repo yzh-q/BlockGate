@@ -34,6 +34,7 @@ pub enum ResourceType {
 pub enum SourceType {
   Official,
   BMCLAPIMirror,
+  FastMinecraftMirror,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Deserialize, Serialize, Default)]

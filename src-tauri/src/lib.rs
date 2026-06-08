@@ -4,6 +4,8 @@ mod error;
 mod instance;
 mod launch;
 mod launcher_config;
+mod multiplayer;
+mod networking;
 mod partial;
 mod resource;
 mod storage;
@@ -161,6 +163,27 @@ pub async fn run() {
       utils::commands::delete_directory,
       utils::commands::retrieve_truetype_font_list,
       utils::commands::check_service_availability,
+      networking::commands::get_available_providers,
+      networking::commands::check_provider_installation,
+      networking::commands::create_network,
+      networking::commands::join_network,
+      networking::commands::leave_network,
+      networking::commands::get_network_status,
+      networking::commands::start_network_as_host,
+      networking::commands::start_network_as_guest,
+      multiplayer::commands::login_to_multiplayer,
+      multiplayer::commands::logout_from_multiplayer,
+      multiplayer::commands::get_current_user,
+      multiplayer::commands::get_online_users,
+      multiplayer::commands::create_game_room,
+      multiplayer::commands::get_active_rooms,
+      multiplayer::commands::join_game_room,
+      multiplayer::commands::leave_game_room,
+      multiplayer::commands::update_room_info,
+      multiplayer::commands::lock_room,
+      multiplayer::commands::refresh_room_list,
+      multiplayer::commands::initialize_multiplayer_network,
+      multiplayer::commands::get_network_info,
     ])
     .setup(|app| {
       // init APP_DATA_DIR
@@ -207,6 +230,9 @@ pub async fn run() {
 
       let launching_queue = Vec::<LaunchingState>::new();
       app.manage(Mutex::new(launching_queue));
+
+      let multiplayer_state = multiplayer::MultiplayerState::default();
+      app.manage(multiplayer_state);
 
       // start local yggdrasil server for offline accounts
       let local_ygg_server = YggdrasilServer::new();

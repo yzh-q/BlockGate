@@ -263,6 +263,10 @@ pub async fn get_neoforge_meta_by_game_version(
           return Ok(meta);
         }
       }
+      SourceType::FastMinecraftMirror => {
+        // FastMinecraftMirror 不提供 NeoForge 元数据，跳过
+        continue;
+      }
     }
     println!("{:?} failed, fallback", source_type);
   }

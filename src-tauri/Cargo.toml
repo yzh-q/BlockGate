@@ -1,10 +1,9 @@
 [package]
-name = "SJMCL"
-version = "0.6.5"
-description = "A Minecraft launcher from SJMC"
-authors = ["SJMCL Team"]
-license = "GNU General Public License v3.0 (with additional terms)"
-repository = "https://github.com/UNIkeEN/SJMCL"
+name = "blockgate"
+version = "1.2.0"
+description = "A Minecraft launcher"
+authors = ["BlockGate Team"]
+license = "GPLv3"
 edition = "2021"
 rust-version = "1.91.0"
 
@@ -20,7 +19,7 @@ dotenvy = "0.15.7"
 opt-level = 3   # as default
 strip = true
 lto = true
-panic = "abort"
+panic = "unwind"
 
 [dependencies]
 serde_json = "1.0"
@@ -50,6 +49,8 @@ base64 = "0.22.1"
 image = { version = "0.25.5", features = ["serde"] }
 rand = "0.9.0"
 zip = "2.3"
+flate2 = "1.0.28"
+tar = "0.4.38"
 quartz_nbt = { version = "0.2.9", features = ["serde"] }
 regex = "1.11"
 toml = "0.8"
@@ -69,7 +70,7 @@ strum_macros = "0.27.1"
 smart-default = "0.7.1"
 tauri-plugin-clipboard-manager = "2.2.2"
 serde_with = "3.12.0"
-chrono = "0.4.40"
+chrono = { version = "0.4.40", features = ["serde"] }
 sanitize-filename = "0.6.0"
 cafebabe = "0.8.1"
 tauri-plugin-deep-link = "2"
@@ -91,6 +92,8 @@ axum = "0.8.6"
 tower-http = { version = "0.6.6", features = ["cors"] }
 sha2 = "0.10.9"
 async-trait = "0.1.89"
+tempfile = "3.10.1"
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
 
 [target."cfg(windows)".dependencies]
 winreg = "0.55.0"

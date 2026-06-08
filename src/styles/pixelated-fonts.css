@@ -1,0 +1,161 @@
+/**
+ * 像素字体样式
+ * 
+ * 使用 Google Fonts 的 Press Start 2P 字体，创建统一的像素化文字样式
+ */
+
+/* 导入 Google Fonts 的 Press Start 2P 字体 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* 像素字体基础样式 */
+.pixel-font {
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 1px;
+}
+
+/* 像素字体标题样式 */
+.pixel-font-title {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+/* 像素字体大标题样式 */
+.pixel-font-heading {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* 像素字体正文样式 */
+.pixel-font-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* 像素字体小字样式 */
+.pixel-font-small {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* 像素字体极小字样式 */
+.pixel-font-tiny {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* 像素字体白色文字（深色背景） */
+.pixel-font-white {
+  color: #FFFFFF;
+}
+
+/* 像素字体黑色文字（浅色背景） */
+.pixel-font-black {
+  color: #000000;
+}
+
+/* 像素字体金色文字（选中状态） */
+.pixel-font-gold {
+  color: #FFD700;
+}
+
+/* 像素字体禁用文字 */
+.pixel-font-disabled {
+  color: #4F4F4F;
+}
+
+/* 像素字体发光效果（用于特殊元素） */
+.pixel-font-glow {
+  text-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 30px currentColor;
+}
+
+/* 像素字体悬停效果 */
+.pixel-font-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.pixel-font-hover:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+/* 像素字体动画效果 - 闪烁 */
+.pixel-font-blink {
+  animation: pixel-blink 1s infinite;
+}
+
+@keyframes pixel-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 像素字体动画效果 - 跳动 */
+.pixel-font-jump {
+  animation: pixel-jump 0.5s infinite;
+}
+
+@keyframes pixel-jump {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* 像素字体动画效果 - 旋转 */
+.pixel-font-rotate {
+  animation: pixel-rotate 2s linear infinite;
+}
+
+@keyframes pixel-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 像素字体响应式调整 */
+@media (max-width: 600px) {
+  .pixel-font-title {
+    font-size: 20px;
+  }
+  
+  .pixel-font-heading {
+    font-size: 18px;
+  }
+  
+  .pixel-font-body {
+    font-size: 14px;
+  }
+  
+  .pixel-font-small {
+    font-size: 10px;
+  }
+  
+  .pixel-font-tiny {
+    font-size: 8px;
+  }
+}
+
+/* 像素字体打印样式 */
+@media print {
+  .pixel-font {
+    font-family: 'Courier New', monospace;
+  }
+}

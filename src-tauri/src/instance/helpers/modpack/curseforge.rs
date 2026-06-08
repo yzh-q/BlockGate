@@ -152,7 +152,7 @@ impl ModpackManifest for CurseForgeManifest {
         let class_id = {
           let project_resp = client
             .get(format!("https://api.curseforge.com/v1/mods/{project_id}"))
-            .header("x-api-key", env!("SJMCL_CURSEFORGE_API_KEY"))
+            .header("x-api-key", env!("BLOCKGATE_CURSEFORGE_API_KEY"))
             .header("accept", "application/json")
             .send()
             .await
@@ -166,7 +166,7 @@ impl ModpackManifest for CurseForgeManifest {
             .get(format!(
               "https://api.curseforge.com/v1/mods/{project_id}/files/{file_id}"
             ))
-            .header("x-api-key", env!("SJMCL_CURSEFORGE_API_KEY"))
+            .header("x-api-key", env!("BLOCKGATE_CURSEFORGE_API_KEY"))
             .header("accept", "application/json")
             .send()
             .await

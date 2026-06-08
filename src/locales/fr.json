@@ -58,11 +58,11 @@
       "settings": {
         "copyright": {
           "title": "Droits d'auteur",
-          "description": "Copyright © 2024-2025 Équipe de développement SJMCL."
+          "description": "Copyright © 2024-2025 Équipe BlockGate."
         },
         "userAgreement": {
           "title": "Accord d'utilisateur",
-          "url": "https://mc.sjtu.cn/sjmcl/en/docs/tos"
+          "url": "https://blockgate.example.com/tos"
         },
         "openSourceLicense": {
           "title": "Licence open source",
@@ -157,7 +157,7 @@
         "title": "Options avancées",
         "uuid": {
           "label": "UUID",
-          "placeholder": "(Généré automatiquement par SJMCL)",
+          "placeholder": "(Généré automatiquement par BlockGate)",
           "errorMessage": "Format UUID incorrect"
         }
       }
@@ -186,7 +186,7 @@
       "description": {
         "start": {
           "3rdparty": "Cette source d'authentification prend en charge la proposition Yggdrasil Connect",
-          "microsoft": "SJMCL prend en charge le flux d'autorisation d'appareil OAuth 2.0 de Microsoft"
+          "microsoft": "BlockGate prend en charge le flux d'autorisation d'appareil OAuth 2.0 de Microsoft"
         },
         "next": "Veuillez cliquer sur le bouton Continuer la connexion pour ouvrir la fenêtre de connexion et saisir le code ci-dessus (déjà copié)"
       },
@@ -481,7 +481,7 @@
       "type": "Type"
     },
     "warning": {
-      "mojang": "Le runtime Java distribué par Mojang sera installé par SJMCL dans un répertoire spécifique.",
+      "mojang": "Le runtime Java distribué par Mojang sera installé par BlockGate dans un répertoire spécifique.",
       "oracle": "Le téléchargement à partir de la source Oracle peut nécessiter une connexion."
     }
   },
@@ -510,7 +510,8 @@
           "title": "Stratégie de sélection de la source de téléchargement",
           "auto": "Sélection automatique",
           "official": "Priorité à la source officielle",
-          "mirror": "Priorité au miroir"
+          "mirror": "Priorité à BMCLAPI",
+          "fastMinecraftMirror": "Priorité à FastMinecraftMirror"
         }
       }
     },
@@ -987,14 +988,14 @@
         "directories": {
           "special": {
             "CURRENT_DIR": "Dossier actuel",
-            "APP_DATA_SUBDIR": "Dossier de données SJMCL",
+            "APP_DATA_SUBDIR": "Dossier de données BlockGate",
             "OFFICIAL_DIR": "Dossier du lanceur officiel"
           }
         }
       },
       "deleteDialog": {
         "title": "Supprimer le répertoire du jeu",
-        "content": "Êtes-vous sûr de vouloir supprimer le répertoire du jeu {{dirName}} ? (SJMCL ne le scannera plus, mais les fichiers ne seront pas supprimés du disque)"
+        "content": "Êtes-vous sûr de vouloir supprimer le répertoire du jeu {{dirName}} ? (BlockGate ne le scannera plus, mais les fichiers ne seront pas supprimés du disque)"
       },
       "directoryNotExist": "Ce répertoire n'existe pas, veuillez le supprimer et l'ajouter à nouveau"
     },
@@ -1097,6 +1098,7 @@
       "launch": "Lancer",
       "instances": "Instances",
       "accounts": "Comptes",
+      "multiplayer": "Multijoueur",
       "discover": "Découvrir",
       "search": "Recherche",
       "settings": "Paramètres"
@@ -1113,7 +1115,7 @@
         },
         "SJMC": {
           "title": "Club Minecraft de l'Université Jiao Tong de Shanghai (SJMC)",
-          "url": "https://mc.sjtu.cn/en/"
+          "url": "https://blockgate.example.com/en/"
         }
       }
     },
@@ -1138,8 +1140,8 @@
     "top": {
       "settings": {
         "LauncherDocs": {
-          "title": "Documentation du lanceur SJMC",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs"
+          "title": "Documentation du lanceur BlockGate",
+          "url": "https://blockgate.example.com/sjmcl/zh/docs"
         }
       }
     }
@@ -1323,7 +1325,7 @@
     },
     "confirmDelete": {
       "title": "Supprimer Java",
-      "description": "Êtes-vous sûr de vouloir supprimer cette version de Java ? (SJMCL ne pourra plus l'utiliser pour lancer le jeu, mais les fichiers ne seront pas supprimés du disque)"
+      "description": "Êtes-vous sûr de vouloir supprimer cette version de Java ? (BlockGate ne pourra plus l'utiliser pour lancer le jeu, mais les fichiers ne seront pas supprimés du disque)"
     }
   },
   "LaunchPage": {
@@ -1444,7 +1446,7 @@
       "neoforge": "NeoForge",
       "authlibInjector": "Authlib Injector",
       "github": "GitHub",
-      "sjmclapi": "API du lanceur SJMC"
+      "blockgateapi": "API du lanceur BlockGate"
     }
   },
   "ReLoginPlayerModal": {
@@ -1464,8 +1466,8 @@
   },
   "RestartForUpdateConfirmDialog": {
     "title": "Mise à jour du lanceur",
-    "body": "La nouvelle version a été téléchargée. Redémarrez SJMCL pour finaliser la mise à jour.",
-    "bodyMSI": "La nouvelle version a été téléchargée. Cliquer sur « Installer » fermera SJMCL et exécutera le programme d'installation.",
+    "body": "La nouvelle version a été téléchargée. Redémarrez BlockGate pour finaliser la mise à jour.",
+    "bodyMSI": "La nouvelle version a été téléchargée. Cliquer sur « Installer » fermera BlockGate et exécutera le programme d'installation.",
     "button": {
       "restart": "Redémarrer",
       "install": "Installer",
@@ -2480,7 +2482,7 @@
     "header": {
       "title": "Étoilez-nous sur GitHub !"
     },
-    "body": "Si vous aimez SJMCL et souhaitez nous soutenir, pouvez-vous nous donner une étoile sur GitHub ? Ce petit geste compte beaucoup pour nous et nous motive à continuer à améliorer l'expérience.",
+    "body": "Si vous aimez BlockGate et souhaitez nous soutenir, pouvez-vous nous donner une étoile sur GitHub ? Ce petit geste compte beaucoup pour nous et nous motive à continuer à améliorer l'expérience.",
     "button": {
       "later": "Plus tard",
       "starUs": "Étoiler"
@@ -2555,11 +2557,11 @@
       "title": "Bienvenue !"
     },
     "body": {
-      "text": "Bienvenue sur SJMCL ! Avant de commencer, veuillez lire et accepter notre <terms>Accord d'utilisateur</terms>."
+      "text": "Bienvenue sur BlockGate ! Avant de commencer, veuillez lire et accepter notre <terms>Accord d'utilisateur</terms>."
     },
     "warning": {
-      "unstableVersion": "Vous utilisez actuellement SJMCL (version {{versionLabel}}). Certaines fonctionnalités peuvent être instables ou encore en développement. Nous vous invitons à signaler tout problème d'utilisation ou à soumettre vos suggestions d'amélioration.",
-      "winArm64Notice": "SJMCL prend désormais en charge la plateforme Windows on Arm. Si vous utilisez un appareil basé sur une plateforme <b>Qualcomm</b>, vous devrez peut-être installer le <glpack>Pack de compatibilité OpenGL</glpack> pour pouvoir jouer."
+      "unstableVersion": "Vous utilisez actuellement BlockGate (version {{versionLabel}}). Certaines fonctionnalités peuvent être instables ou encore en développement. Nous vous invitons à signaler tout problème d'utilisation ou à soumettre vos suggestions d'amélioration.",
+      "winArm64Notice": "BlockGate prend désormais en charge la plateforme Windows on Arm. Si vous utilisez un appareil basé sur une plateforme <b>Qualcomm</b>, vous devrez peut-être installer le <glpack>Pack de compatibilité OpenGL</glpack> pour pouvoir jouer."
     },
     "button": {
       "exit": "Quitter",

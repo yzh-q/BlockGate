@@ -68,6 +68,11 @@ export interface LauncherConfig {
   };
   mocked: boolean;
   runCount: number;
+  sponsor: {
+    verified: boolean;
+    lastRemindRunCount: number;
+    key?: string;
+  };
   appearance: {
     theme: {
       primaryColor: string;
@@ -114,7 +119,6 @@ export interface LauncherConfig {
       language: string;
     };
     functionality: {
-      discoverPage: boolean;
       instancesNavType: string;
       launchPageQuickSwitch: boolean;
       resourceTranslation: boolean;
@@ -126,7 +130,6 @@ export interface LauncherConfig {
   };
   localGameDirectories: GameDirectory[];
   globalGameConfig: GameConfig;
-  discoverSourceEndpoints: [string, boolean][];
   extraJavaPaths: string[];
   suppressedDialogs: string[];
   states: {
@@ -221,6 +224,10 @@ export const defaultConfig: LauncherConfig = {
   },
   mocked: true,
   runCount: -1,
+  sponsor: {
+    verified: false,
+    lastRemindRunCount: -1,
+  },
   appearance: {
     theme: {
       primaryColor: "blue",
@@ -267,7 +274,6 @@ export const defaultConfig: LauncherConfig = {
       language: "zh-Hans",
     },
     functionality: {
-      discoverPage: false,
       instancesNavType: "instance",
       launchPageQuickSwitch: true,
       resourceTranslation: true,
@@ -279,10 +285,6 @@ export const defaultConfig: LauncherConfig = {
   },
   localGameDirectories: [{ name: "Current", dir: ".minecraft/" }],
   globalGameConfig: defaultGameConfig,
-  discoverSourceEndpoints: [
-    ["https://mc.sjtu.cn/api-sjmcl/article", true],
-    ["https://mc.sjtu.cn/api-sjmcl/article/mua", true],
-  ],
   extraJavaPaths: [],
   suppressedDialogs: [],
   states: {

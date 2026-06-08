@@ -58,11 +58,11 @@
       "settings": {
         "copyright": {
           "title": "版權",
-          "description": "版權所有 © 2024-2025 SJMCL 開發團隊."
+          "description": "版權所有 © 2024-2025 BlockGate 開發團隊."
         },
         "userAgreement": {
           "title": "使用者協議",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs/tos"
+          "url": "https://blockgate.example.com/tos"
         },
         "openSourceLicense": {
           "title": "開源協議",
@@ -157,7 +157,7 @@
         "title": "高階選項",
         "uuid": {
           "label": "UUID",
-          "placeholder": "（由 SJMCL 自動生成）",
+          "placeholder": "（由 BlockGate 自動生成）",
           "errorMessage": "UUID 格式不正確"
         }
       }
@@ -186,7 +186,7 @@
       "description": {
         "start": {
           "3rdparty": "此認證源支援 Yggdrasil Connect 規範提案",
-          "microsoft": "SJMCL 支援微軟 OAuth 2.0 裝置許可權授予流"
+          "microsoft": "BlockGate 支援微軟 OAuth 2.0 裝置許可權授予流"
         },
         "next": "請點選繼續登入按鈕跳轉登入頁面，輸入以上程式碼（已自動複製）"
       },
@@ -481,7 +481,7 @@
       "type": "型別"
     },
     "warning": {
-      "mojang": "由 Mojang 分發的 Java 執行時將由 SJMCL 安裝到特定目錄",
+      "mojang": "由 Mojang 分發的 Java 執行時將由 BlockGate 安裝到特定目錄",
       "oracle": "從 Oracle 源下載可能需要登入"
     }
   },
@@ -510,7 +510,8 @@
           "title": "下載源選擇策略",
           "auto": "自動選擇",
           "official": "官方源優先",
-          "mirror": "映象源優先"
+          "mirror": "BMCLAPI 優先",
+          "fastMinecraftMirror": "FastMinecraftMirror 優先"
         }
       }
     },
@@ -987,14 +988,14 @@
         "directories": {
           "special": {
             "CURRENT_DIR": "當前資料夾",
-            "APP_DATA_SUBDIR": "SJMCL 資料資料夾",
+            "APP_DATA_SUBDIR": "BlockGate 資料資料夾",
             "OFFICIAL_DIR": "官方啟動器資料夾"
           }
         }
       },
       "deleteDialog": {
         "title": "刪除遊戲目錄",
-        "content": "確定要刪除遊戲目錄 {{dirName}} 嗎？（SJMCL 將不會掃描此目錄，但不會刪除硬碟上的檔案）"
+        "content": "確定要刪除遊戲目錄 {{dirName}} 嗎？（BlockGate 將不會掃描此目錄，但不會刪除硬碟上的檔案）"
       },
       "directoryNotExist": "該目錄不存在，請刪除並重新新增"
     },
@@ -1097,6 +1098,7 @@
       "launch": "啟動",
       "instances": "例項",
       "accounts": "賬戶",
+      "multiplayer": "多人",
       "discover": "發現",
       "search": "搜尋",
       "settings": "設定"
@@ -1113,7 +1115,7 @@
         },
         "SJMC": {
           "title": "上海交通大學 Minecraft 社（SJMC）",
-          "url": "https://mc.sjtu.cn"
+          "url": "https://blockgate.example.com"
         }
       }
     },
@@ -1138,8 +1140,8 @@
     "top": {
       "settings": {
         "LauncherDocs": {
-          "title": "SJMC Launcher 文件",
-          "url": "https://mc.sjtu.cn/sjmcl/zh/docs"
+          "title": "BlockGate Launcher 文件",
+          "url": "https://blockgate.example.com/sjmcl/zh/docs"
         }
       }
     }
@@ -1323,7 +1325,7 @@
     },
     "confirmDelete": {
       "title": "移除 Java",
-      "description": "確認要移除此版本 Java 嗎？（SJMCL 將無法使用此 Java 啟動遊戲，但不會刪除硬碟上的檔案）"
+      "description": "確認要移除此版本 Java 嗎？（BlockGate 將無法使用此 Java 啟動遊戲，但不會刪除硬碟上的檔案）"
     }
   },
   "LaunchPage": {
@@ -1444,7 +1446,7 @@
       "neoforge": "NeoForge",
       "authlibInjector": "Authlib Injector",
       "github": "GitHub",
-      "sjmclapi": "SJMC Launcher API"
+      "blockgateapi": "BlockGate Launcher API"
     }
   },
   "ReLoginPlayerModal": {
@@ -1464,8 +1466,8 @@
   },
   "RestartForUpdateConfirmDialog": {
     "title": "啟動器更新",
-    "body": "新版本已完成下載，重新啟動 SJMCL 以完成更新",
-    "bodyMSI": "新版本已完成下載，點選安裝將關閉 SJMCL 並執行安裝程式",
+    "body": "新版本已完成下載，重新啟動 BlockGate 以完成更新",
+    "bodyMSI": "新版本已完成下載，點選安裝將關閉 BlockGate 並執行安裝程式",
     "button": {
       "restart": "重新啟動",
       "install": "安裝",
@@ -2474,7 +2476,7 @@
     "header": {
       "title": "在 GitHub 為我們點亮星標"
     },
-    "body": "如果您喜愛 SJMCL，並希望支援我們，可以在 GitHub 為我們點一顆星嗎？這個小小的動作對我們來說意義重大，能激勵我們為您持續提供特性體驗。",
+    "body": "如果您喜愛 BlockGate，並希望支援我們，可以在 GitHub 為我們點一顆星嗎？這個小小的動作對我們來說意義重大，能激勵我們為您持續提供特性體驗。",
     "button": {
       "later": "稍後",
       "starUs": "點亮星標"
@@ -2549,10 +2551,10 @@
       "title": "歡迎！"
     },
     "body": {
-      "text": "歡迎使用 SJMCL！在開始使用之前，請務必閱讀並同意我們的<terms>使用者協議</terms>。"
+      "text": "歡迎使用 BlockGate！在開始使用之前，請務必閱讀並同意我們的<terms>使用者協議</terms>。"
     },
     "warning": {
-      "unstableVersion": "您正在使用{{versionLabel}}的 SJMCL，部分功能可能不穩定或未開發完成，歡迎報告使用問題與功能建議。"
+      "unstableVersion": "您正在使用{{versionLabel}}的 BlockGate，部分功能可能不穩定或未開發完成，歡迎報告使用問題與功能建議。"
     },
     "button": {
       "exit": "退出",

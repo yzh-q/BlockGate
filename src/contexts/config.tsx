@@ -28,6 +28,8 @@ interface LauncherConfigContextType {
   getJavaInfos: (sync?: boolean) => JavaInfo[] | undefined;
   // shared service handlers
   handleCheckLauncherUpdate: () => Promise<VersionMetaInfo>;
+  shouldShowSponsorRemind: boolean;
+  markSponsorRemindShown: () => void;
 }
 
 const LauncherConfigContext = createContext<
@@ -48,6 +50,27 @@ export const LauncherConfigContextProvider: React.FC<{
     defaultVersionMetaInfo
   );
 
+  // 判断是否应该显示赞助提示
+  const shouldShowSponsorRemind =
+    config.sponsor &&
+    !config.sponsor.verified &&
+    config.runCount >= 3 &&
+    config.sponsor.lastRemindRunCount !== undefined &&
+    config.runCount - config.sponsor.lastRemindRunCount >= 3;
+
+  // 标记赞助提示已显示
+  const markSponsorRemindShown = useCallback(() => {
+    if (config.sponsor) {
+      handleUpdateLauncherConfig("sponsor.lastRemindRunCount", config.runCount);
+    }
+  }, [config.runCount, config.sponsor]);
+
+  // 增加启动计数
+  const incrementRunCount = useCallback(() => {
+    const newCount = config.runCount + 1;
+    handleUpdateLauncherConfig("runCount", newCount);
+  }, [config.runCount]);
+
   const handleRetrieveLauncherConfig = useCallback(() => {
     ConfigService.retrieveLauncherConfig().then((response) => {
       if (response.status === "success") {
@@ -65,6 +88,13 @@ export const LauncherConfigContextProvider: React.FC<{
   useEffect(() => {
     handleRetrieveLauncherConfig();
   }, [handleRetrieveLauncherConfig]);
+
+  // 启动时增加计数
+  useEffect(() => {
+    if (config.runCount !== -1) {
+      incrementRunCount();
+    }
+  }, []);
 
   useEffect(() => {
     i18n.changeLanguage(config.general.general.language);
@@ -143,20 +173,28 @@ export const LauncherConfigContextProvider: React.FC<{
   // check launcher update
   const handleCheckLauncherUpdate =
     useCallback(async (): Promise<VersionMetaInfo> => {
-      const response = await ConfigService.checkLauncherUpdate();
-      if (response.status === "success") {
-        setNewerVersion(
-          response.data.version == "up2date"
-            ? defaultVersionMetaInfo
-            : response.data
-        );
-        return response.data;
+      try {
+        const response = await ConfigService.checkLauncherUpdate();
+        if (response.status === "success") {
+          setNewerVersion(
+            response.data.version == "up2date"
+              ? defaultVersionMetaInfo
+              : response.data
+          );
+          return response.data;
+        }
+      } catch (e) {
+        console.error("Failed to check launcher update:", e);
       }
       return defaultVersionMetaInfo;
     }, []);
 
+  // 启动3秒后自动检查更新
   useEffect(() => {
-    handleCheckLauncherUpdate();
+    const timer = setTimeout(() => {
+      handleCheckLauncherUpdate();
+    }, 3000);
+    return () => clearTimeout(timer);
   }, [handleCheckLauncherUpdate]);
 
   return (
@@ -168,6 +206,8 @@ export const LauncherConfigContextProvider: React.FC<{
         newerVersion,
         getJavaInfos,
         handleCheckLauncherUpdate,
+        shouldShowSponsorRemind,
+        markSponsorRemindShown,
       }}
     >
       <ColorModeScript initialColorMode={userSelectedColorMode} />

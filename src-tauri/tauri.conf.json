@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "SJMCL",
-  "version": "0.6.5",
-  "identifier": "SJMCL",
+  "productName": "BlockGate",
+  "version": "1.2.0",
+  "identifier": "BlockGate",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -19,8 +19,7 @@
         "height": 550,
         "minWidth": 800,
         "minHeight": 550,
-        "center": true,
-        "dragDropEnabled": false
+        "center": true
       },
       {
         "label": "game_error",
@@ -31,8 +30,7 @@
         "height": 550,
         "minWidth": 640,
         "minHeight": 440,
-        "center": true,
-        "dragDropEnabled": false
+        "center": true
       },
       {
         "label": "game_log",
@@ -43,8 +41,7 @@
         "height": 550,
         "minWidth": 640,
         "minHeight": 440,
-        "center": true,
-        "dragDropEnabled": false
+        "center": true
       }
     ],
     "security": {
@@ -111,7 +108,7 @@
     "deep-link": {
       "desktop": {
         "schemes": [
-          "sjmcl"
+          "blockgate"
         ]
       }
     },

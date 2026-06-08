@@ -505,46 +505,18 @@ export const TaskContextProvider: React.FC<{ children: React.ReactNode }> = ({
                   (t) => t.taskGroup === payload.taskGroup
                 );
                 if (group && group.taskDescs.length > 0) {
-                  const isMSI =
-                    config.basicInfo.osType === "windows" &&
-                    !config.basicInfo.isPortable;
-                  openGenericConfirmDialog({
-                    title: t("RestartForUpdateConfirmDialog.title"),
-                    body: t(
-                      `RestartForUpdateConfirmDialog.${isMSI ? "bodyMSI" : "body"}`
-                    ),
-                    btnOK: t(
-                      `RestartForUpdateConfirmDialog.button.${isMSI ? "install" : "restart"}`
-                    ),
-                    btnCancel: t("RestartForUpdateConfirmDialog.button.later"),
-                    onOKCallback: () => {
-                      ConfigService.installLauncherUpdate(
-                        group.taskDescs[0].payload.filename || "",
-                        true
-                      ).then((response) => {
-                        if (response.status !== "success") {
-                          toast({
-                            title: response.message,
-                            description: response.details,
-                            status: "error",
-                          });
-                        }
+                  // 下载完成后自动安装更新并重启
+                  ConfigService.installLauncherUpdate(
+                    group.taskDescs[0].payload.filename || "",
+                    true
+                  ).then((response) => {
+                    if (response.status !== "success") {
+                      toast({
+                        title: response.message,
+                        description: response.details,
+                        status: "error",
                       });
-                    },
-                    onCancelCallback: () => {
-                      ConfigService.installLauncherUpdate(
-                        group.taskDescs[0].payload.filename || "",
-                        false
-                      ).then((response) => {
-                        if (response.status !== "success") {
-                          toast({
-                            title: response.message,
-                            description: response.details,
-                            status: "error",
-                          });
-                        }
-                      });
-                    },
+                    }
                   });
                 }
                 break;

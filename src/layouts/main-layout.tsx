@@ -3,7 +3,6 @@ import {
   Flex,
   useColorMode,
   useColorModeValue,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { appDataDir } from "@tauri-apps/api/path";
@@ -11,12 +10,8 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { BeatLoader } from "react-spinners";
 import AdvancedCard from "@/components/common/advanced-card";
-import DevToolbar from "@/components/dev/dev-toolbar";
 import HeadNavBar from "@/components/head-navbar";
-import StarUsModal from "@/components/modals/star-us-modal";
-import WelcomeAndTermsModal from "@/components/modals/welcome-and-terms-modal";
 import { useLauncherConfig } from "@/contexts/config";
-import { isDev } from "@/utils/env";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -33,44 +28,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const isCheckedRunCount = useRef(false);
   const isStandAlone = router.pathname.startsWith("/standalone");
 
-  const {
-    isOpen: isWelcomeAndTermsModalOpen,
-    onOpen: onWelcomeAndTermsModalOpen,
-    onClose: onWelcomeAndTermsModalClose,
-  } = useDisclosure();
-
-  const {
-    isOpen: isStarUsModalOpen,
-    onOpen: onStarUsModalOpen,
-    onClose: onStarUsModalClose,
-  } = useDisclosure();
-
-  // update run count, conditionally show some modals.
+  // update run count.
   useEffect(() => {
     if (!config.mocked && !isCheckedRunCount.current && !isStandAlone) {
-      if (!config.runCount) {
-        setTimeout(() => {
-          onWelcomeAndTermsModalOpen();
-        }, 300); // some delay to avoid sudden popup
-      } else {
-        let newCount = config.runCount + 1;
-        if (newCount === 10) {
-          setTimeout(() => {
-            onStarUsModalOpen();
-          }, 300);
-        }
-        update("runCount", newCount);
-      }
+      let newCount = config.runCount ? config.runCount + 1 : 1;
+      update("runCount", newCount);
       isCheckedRunCount.current = true;
     }
-  }, [
-    config.mocked,
-    config.runCount,
-    isStandAlone,
-    onWelcomeAndTermsModalOpen,
-    onStarUsModalOpen,
-    update,
-  ]);
+  }, [config.mocked, config.runCount, isStandAlone, update]);
 
   // construct background img src url from config.
   useEffect(() => {
@@ -157,7 +122,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         }}
       >
         {children}
-        {isDev && <DevToolbar />}
       </div>
     );
   }
@@ -196,14 +160,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children}
         </AdvancedCard>
       )}
-
-      <WelcomeAndTermsModal
-        isOpen={isWelcomeAndTermsModalOpen}
-        onClose={onWelcomeAndTermsModalClose}
-      />
-      <StarUsModal isOpen={isStarUsModalOpen} onClose={onStarUsModalClose} />
-
-      {isDev && <DevToolbar />}
     </Flex>
   );
 };

@@ -3,7 +3,9 @@ use crate::account::helpers::offline::yggdrasil_server::YggdrasilServer;
 use crate::account::helpers::{authlib_injector, microsoft};
 use crate::account::models::PlayerType;
 use crate::error::SJMCLResult;
-use crate::instance::helpers::client_json::{replace_native_libraries, McClientInfo};
+use crate::instance::helpers::client_json::{
+  replace_native_libraries, resolve_inherits_from, McClientInfo,
+};
 use crate::instance::helpers::misc::{get_instance_game_config, get_instance_subdir_paths};
 use crate::instance::models::misc::{Instance, InstanceError, InstanceSubdirType, ModLoaderStatus};
 use crate::launch::helpers::command_generator::{
@@ -64,6 +66,7 @@ pub async fn select_suitable_jre(
     .version_path
     .join(format!("{}.json", instance.name));
   let client_info = load_json_async::<McClientInfo>(&client_path).await?;
+  let client_info = resolve_inherits_from(&app, client_info, &instance.version_path).await?;
 
   refresh_and_update_javas(&app).await;
   let javas = javas_state.lock()?.clone();

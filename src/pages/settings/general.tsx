@@ -1,8 +1,8 @@
-import { Badge, Button, Kbd, Switch, Text } from "@chakra-ui/react";
+import { Button, Switch } from "@chakra-ui/react";
 import { appLogDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
-import React from "react";
-import { Trans, useTranslation } from "react-i18next";
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MenuSelector } from "@/components/common/menu-selector";
 import {
   OptionItemGroup,
@@ -22,9 +22,57 @@ const GeneralSettingsPage = () => {
   const generalConfigs = config.general;
   const primaryColor = config.appearance.theme.primaryColor;
   const { removeHistory } = useRoutingHistory();
-  const { openGenericConfirmDialog, closeSharedModal } = useSharedModals();
+  const { openGenericConfirmDialog, closeSharedModal, openSharedModal } =
+    useSharedModals();
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
 
   const instancesNavTypes = ["instance", "directory", "hidden"];
+
+  const handleCheckUpdate = () => {
+    setIsCheckingUpdate(true);
+    toast({
+      title: t("AboutSettingsPage.about.settings.version.checkToast.loading"),
+      status: "info",
+    });
+    ConfigService.checkLauncherUpdate()
+      .then((response) => {
+        setIsCheckingUpdate(false);
+        if (response.status !== "success") {
+          toast({
+            title: t(
+              "AboutSettingsPage.about.settings.version.checkToast.error"
+            ),
+            description: response.details,
+            status: "error",
+          });
+          return;
+        }
+        const versionInfo = response.data;
+        if (
+          versionInfo &&
+          versionInfo.version &&
+          versionInfo.version !== "up2date"
+        ) {
+          openSharedModal("notify-new-version", {
+            newVersion: versionInfo,
+          });
+        } else {
+          toast({
+            title: t(
+              "AboutSettingsPage.about.settings.version.checkToast.up2date"
+            ),
+            status: "success",
+          });
+        }
+      })
+      .catch(() => {
+        setIsCheckingUpdate(false);
+        toast({
+          title: t("AboutSettingsPage.about.settings.version.checkToast.error"),
+          status: "error",
+        });
+      });
+  };
 
   const generalSettingGroups: OptionItemGroupProps[] = [
     {
@@ -39,48 +87,7 @@ const GeneralSettingsPage = () => {
         },
       ],
     },
-    {
-      title: t("GeneralSettingsPage.functions.title"),
-      items: [
-        {
-          title: t("GeneralSettingsPage.functions.settings.discoverPage.title"),
-          titleExtra: <Badge colorScheme="purple">Beta</Badge>,
-          children: (
-            <Switch
-              colorScheme={primaryColor}
-              isChecked={generalConfigs.functionality.discoverPage}
-              onChange={(e) => {
-                update("general.functionality.discoverPage", e.target.checked);
-                if (e.target.checked) {
-                  openGenericConfirmDialog({
-                    title: t("General.notice"),
-                    body: (
-                      <Text>
-                        <Trans
-                          i18nKey="GeneralSettingsPage.functions.settings.discoverPage.openNotice.content"
-                          values={{
-                            keyname: t(
-                              `Enums.${config.basicInfo.osType === "macos" ? "metaKey" : "ctrlKey"}.${
-                                config.basicInfo.osType
-                              }`
-                            ),
-                          }}
-                          components={{ key: <Kbd /> }}
-                        />
-                      </Text>
-                    ),
-                    btnCancel: "",
-                    onOKCallback: () => {
-                      closeSharedModal("generic-confirm");
-                    },
-                  });
-                }
-              }}
-            />
-          ),
-        },
-      ],
-    },
+
     {
       items: [
         {
@@ -190,6 +197,21 @@ const GeneralSettingsPage = () => {
     {
       title: t("GeneralSettingsPage.advanced.title"),
       items: [
+        {
+          title: t("AboutSettingsPage.about.settings.version.title"),
+          description: `${t("AboutSettingsPage.about.settings.version.current")}: ${config.basicInfo.launcherVersion}`,
+          children: (
+            <Button
+              variant="subtle"
+              size="xs"
+              colorScheme={primaryColor}
+              isLoading={isCheckingUpdate}
+              onClick={handleCheckUpdate}
+            >
+              {t("AboutSettingsPage.about.settings.version.checkUpdate")}
+            </Button>
+          ),
+        },
         {
           title: t(
             "GeneralSettingsPage.advanced.settings.openConfigJson.title"
