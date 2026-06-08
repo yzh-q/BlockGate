@@ -35,7 +35,7 @@ const PixelatedAccountsPage = () => {
     id: player.id,
     title: player.name,
     description: player.playerType,
-    icon: player.avatar || "👤",
+    icon: player.avatar?.[0] || "👤",
     onClick: () => console.log("Select player:", player.id),
   }));
   

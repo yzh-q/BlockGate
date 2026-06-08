@@ -65,7 +65,7 @@ const PixelatedInstanceListPage = () => {
     id: instance.id,
     title: instance.name,
     description: instance.version || "未知版本",
-    icon: instance.icon || "/images/icons/grass-block.png",
+    icon: instance.iconSrc || "/images/icons/grass-block.png",
     onClick: () => handleInstanceClick(instance),
     onLaunch: () => handleInstanceLaunch(instance),
   }));
