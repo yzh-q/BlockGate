@@ -41,7 +41,7 @@ const PixelatedLaunchPage = () => {
   
   // 获取当前玩家
   useEffect(() => {
-    setPlayer(selectedPlayer);
+    setPlayer(selectedPlayer || null);
   }, [selectedPlayer]);
   
   // 处理启动按钮点击
