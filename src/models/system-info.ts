@@ -12,3 +12,19 @@ export interface MemoryInfo {
   used: number;
   suggestedMaxAlloc: number;
 }
+
+export type JavaVendor = "zulu" | "bellsoft" | "temurin";
+
+export interface ThirdPartyJavaRelease {
+  vendor: JavaVendor;
+  majorVersion: number;
+  fullVersion: string;
+  isLts: boolean;
+  isJre: boolean;
+  architecture: string;
+  os: string;
+  downloadUrl: string;
+  fileName: string;
+  fileSize: number;
+  sha1?: string;
+}

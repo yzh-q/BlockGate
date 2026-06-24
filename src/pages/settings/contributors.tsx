@@ -1,4 +1,4 @@
-import { Avatar, Box, IconButton } from "@chakra-ui/react";
+﻿import { Avatar, Box, IconButton } from "@chakra-ui/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { LuGithub } from "react-icons/lu";

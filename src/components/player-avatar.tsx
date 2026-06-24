@@ -1,4 +1,4 @@
-import { Box, BoxProps, Image } from "@chakra-ui/react";
+﻿import { Box, BoxProps, Image } from "@chakra-ui/react";
 import { base64ImgSrc } from "@/utils/string";
 
 interface PlayerAvatarProps extends BoxProps {

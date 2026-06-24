@@ -1,4 +1,4 @@
-import { Text, TextProps, useColorModeValue } from "@chakra-ui/react";
+﻿import { Text, TextProps, useColorModeValue } from "@chakra-ui/react";
 import React from "react";
 
 // color map in dark mode, followed by the original Minecraft colors.

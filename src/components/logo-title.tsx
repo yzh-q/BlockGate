@@ -1,4 +1,4 @@
-import { BoxProps, HStack, Heading, Highlight, Image } from "@chakra-ui/react";
+﻿import { BoxProps, HStack, Heading, Highlight, Image } from "@chakra-ui/react";
 import styles from "@/styles/logo-title.module.css";
 
 interface LogoTitleProps extends BoxProps {}

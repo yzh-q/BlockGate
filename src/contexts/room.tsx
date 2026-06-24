@@ -1,5 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ReactNode, createContext, useContext, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 interface RoomInfo {
   roomCode: string | null;
@@ -37,60 +44,66 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined);
 export const RoomProvider = ({ children }: { children: ReactNode }) => {
   const [roomState, setRoomState] = useState<RoomInfo>(defaultRoomState);
 
-  const clearRoomState = () => {
+  const clearRoomState = useCallback(() => {
     setRoomState(defaultRoomState);
-  };
+  }, []);
 
-  const startNetworkAsHost = async (networkId: string) => {
-    try {
-      const result = await invoke<{
-        success: boolean;
-        network_id: string;
-        host_ip: string;
-        game_port: number;
-      }>("start_network_as_host", {
-        networkId,
-        gamePort: roomState.gamePort || 25565,
-      });
+  const startNetworkAsHost = useCallback(
+    async (networkId: string) => {
+      try {
+        const result = await invoke<{
+          success: boolean;
+          network_id: string;
+          host_ip: string;
+          game_port: number;
+        }>("start_network_as_host", {
+          networkId,
+          gamePort: roomState.gamePort || 25565,
+        });
 
-      if (result.success) {
-        setRoomState((prev) => ({
-          ...prev,
-          isConnected: true,
-          hostIp: result.host_ip,
-          networkId: result.network_id,
-        }));
+        if (result.success) {
+          setRoomState((prev) => ({
+            ...prev,
+            isConnected: true,
+            hostIp: result.host_ip,
+            networkId: result.network_id,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to start virtual network as host:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Failed to start virtual network as host:", error);
-      throw error;
-    }
-  };
+    },
+    [roomState.gamePort]
+  );
 
-  const startNetworkAsGuest = async (networkId: string) => {
-    try {
-      const result = await invoke<{
-        success: boolean;
-        network_id: string;
-        game_port: number;
-      }>("start_network_as_guest", {
-        networkId,
-        gamePort: roomState.gamePort || 25565,
-      });
+  const startNetworkAsGuest = useCallback(
+    async (networkId: string) => {
+      try {
+        const result = await invoke<{
+          success: boolean;
+          network_id: string;
+          game_port: number;
+        }>("start_network_as_guest", {
+          networkId,
+          gamePort: roomState.gamePort || 25565,
+        });
 
-      if (result.success) {
-        setRoomState((prev) => ({
-          ...prev,
-          isConnected: true,
-        }));
+        if (result.success) {
+          setRoomState((prev) => ({
+            ...prev,
+            isConnected: true,
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to join virtual network as guest:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Failed to join virtual network as guest:", error);
-      throw error;
-    }
-  };
+    },
+    [roomState.gamePort]
+  );
 
-  const stopNetwork = async () => {
+  const stopNetwork = useCallback(async () => {
     try {
       await invoke("stop_network");
       setRoomState((prev) => ({
@@ -101,19 +114,28 @@ export const RoomProvider = ({ children }: { children: ReactNode }) => {
       console.error("Failed to stop network:", error);
       throw error;
     }
-  };
+  }, []);
+
+  const providerValue = useMemo(
+    () => ({
+      roomState,
+      setRoomState,
+      clearRoomState,
+      startNetworkAsHost,
+      startNetworkAsGuest,
+      stopNetwork,
+    }),
+    [
+      roomState,
+      clearRoomState,
+      startNetworkAsHost,
+      startNetworkAsGuest,
+      stopNetwork,
+    ]
+  );
 
   return (
-    <RoomContext.Provider
-      value={{
-        roomState,
-        setRoomState,
-        clearRoomState,
-        startNetworkAsHost,
-        startNetworkAsGuest,
-        stopNetwork,
-      }}
-    >
+    <RoomContext.Provider value={providerValue}>
       {children}
     </RoomContext.Provider>
   );

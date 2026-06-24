@@ -139,91 +139,48 @@ const CheckModUpdateModal: React.FC<CheckModUpdateModalProps> = ({
 
       const updatePromises = currentLocalMods.map(async (mod) => {
         try {
-          const [cfRemoteModRes, mrRemoteModRes] = await Promise.all([
-            ResourceService.fetchRemoteResourceByLocal(
-              OtherResourceSource.CurseForge,
-              mod.filePath
-            ),
-            ResourceService.fetchRemoteResourceByLocal(
+          const mrRemoteModRes =
+            await ResourceService.fetchRemoteResourceByLocal(
               OtherResourceSource.Modrinth,
               mod.filePath
-            ),
-          ]);
+            );
 
-          let cfRemoteMod = undefined;
           let mrRemoteMod = undefined;
 
-          if (cfRemoteModRes.status === "success") {
-            cfRemoteMod = cfRemoteModRes.data;
-          }
           if (mrRemoteModRes.status === "success") {
             mrRemoteMod = mrRemoteModRes.data;
           }
 
-          const updatePromises = [];
-
-          if (cfRemoteMod?.resourceId) {
-            updatePromises.push(
-              handleFetchLatestMod(
-                cfRemoteMod.resourceId,
-                mod.loaderType,
-                [currentSummary?.majorVersion || "All"],
-                OtherResourceSource.CurseForge
-              )
-            );
-          } else {
-            updatePromises.push(Promise.resolve(undefined));
-          }
-
           if (mrRemoteMod?.resourceId) {
-            updatePromises.push(
-              handleFetchLatestMod(
-                mrRemoteMod.resourceId,
-                mod.loaderType,
-                [currentSummary?.version || "All"],
-                OtherResourceSource.Modrinth
-              )
+            const mrRemoteFile = await handleFetchLatestMod(
+              mrRemoteMod.resourceId,
+              mod.loaderType,
+              [currentSummary?.version || "All"],
+              OtherResourceSource.Modrinth
             );
-          } else {
-            updatePromises.push(Promise.resolve(undefined));
-          }
 
-          const [cfRemoteFile, mrRemoteFile] =
-            await Promise.all(updatePromises);
+            let needUpdate = false;
+            if (mrRemoteFile && mrRemoteMod) {
+              needUpdate =
+                new Date(mrRemoteFile.fileDate).getTime() -
+                  new Date(mrRemoteMod.fileDate).getTime() >
+                0;
+            }
 
-          let isCurseForgeNewer = cfRemoteMod !== undefined;
-          if (cfRemoteFile && mrRemoteFile) {
-            isCurseForgeNewer =
-              new Date(cfRemoteFile.fileDate).getTime() >
-              new Date(mrRemoteFile.fileDate).getTime();
-          }
-
-          const latestFile = isCurseForgeNewer ? cfRemoteFile : mrRemoteFile;
-          const remoteMod = isCurseForgeNewer ? cfRemoteMod : mrRemoteMod;
-
-          let needUpdate = false;
-          if (latestFile && remoteMod) {
-            needUpdate =
-              new Date(latestFile.fileDate).getTime() -
-                new Date(remoteMod.fileDate).getTime() >
-              0;
-          }
-
-          if (needUpdate && latestFile) {
-            return {
-              mod,
-              updateRecord: {
-                name: mod.name,
-                curVersion: mod.version,
-                newVersion: latestFile.name,
-                source: isCurseForgeNewer
-                  ? OtherResourceSource.CurseForge
-                  : OtherResourceSource.Modrinth,
-                downloadUrl: latestFile.downloadUrl,
-                sha1: latestFile.sha1,
-                fileName: latestFile.fileName,
-              },
-            };
+            if (needUpdate && mrRemoteFile) {
+              return {
+                mod,
+                updateRecord: {
+                  name: mod.name,
+                  curVersion: mod.version,
+                  newVersion: mrRemoteFile.name,
+                  source: OtherResourceSource.Modrinth,
+                  downloadUrl: mrRemoteFile.downloadUrl,
+                  sha1: mrRemoteFile.sha1,
+                  fileName: mrRemoteFile.fileName,
+                },
+              };
+            }
           }
           return null;
         } catch (error) {

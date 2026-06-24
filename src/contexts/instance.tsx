@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useGlobalData, useGlobalDataDispatch } from "@/contexts/global-data";
@@ -566,22 +567,27 @@ export const InstanceContextProvider: React.FC<{
         if (packs === GetStateFlag.Cancelled) return;
         setResourcePacks(packs);
       });
-      getServerResourcePackList(true).then((packs) => {
-        if (packs === GetStateFlag.Cancelled) return;
-        setServerResourcePacks(packs);
-      });
-      getSchematicList(true).then((schematics) => {
-        if (schematics === GetStateFlag.Cancelled) return;
-        setSchematics(schematics);
-      });
-      getShaderPackList(true).then((packs) => {
-        if (packs === GetStateFlag.Cancelled) return;
-        setShaderPacks(packs);
-      });
-      getScreenshotList(true).then((screenshots) => {
-        if (screenshots === GetStateFlag.Cancelled) return;
-        setScreenshots(screenshots);
-      });
+      // Delay other resources to avoid IPC congestion - they'll
+      // be fetched on-demand when their respective tabs are opened
+      const timer = setTimeout(() => {
+        getServerResourcePackList(true).then((packs) => {
+          if (packs === GetStateFlag.Cancelled) return;
+          setServerResourcePacks(packs);
+        });
+        getSchematicList(true).then((schematics) => {
+          if (schematics === GetStateFlag.Cancelled) return;
+          setSchematics(schematics);
+        });
+        getShaderPackList(true).then((packs) => {
+          if (packs === GetStateFlag.Cancelled) return;
+          setShaderPacks(packs);
+        });
+        getScreenshotList(true).then((screenshots) => {
+          if (screenshots === GetStateFlag.Cancelled) return;
+          setScreenshots(screenshots);
+        });
+      }, 500);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instanceId]);
@@ -591,35 +597,61 @@ export const InstanceContextProvider: React.FC<{
   //   handleRetrieveInstanceGameConfig
   // );
 
+  const providerValue = useMemo(
+    () => ({
+      instanceId,
+      summary: instanceSummary,
+      updateSummaryInContext,
+      gameConfig: instanceGameConfig,
+      openInstanceSubdir,
+      getWorldList,
+      isWorldListLoading,
+      getLocalModList,
+      isLocalModListLoading,
+      getResourcePackList,
+      isResourcePackListLoading,
+      getServerResourcePackList,
+      isServerResourcePackListLoading,
+      getSchematicList,
+      isSchematicListLoading,
+      getShaderPackList,
+      isShaderPackListLoading,
+      getScreenshotList,
+      isScreenshotListLoading,
+      handleRetrieveInstanceSubdirPath,
+      handleImportResource,
+      handleUpdateInstanceConfig,
+      handleResetInstanceGameConfig,
+    }),
+    [
+      instanceId,
+      instanceSummary,
+      updateSummaryInContext,
+      instanceGameConfig,
+      openInstanceSubdir,
+      getWorldList,
+      isWorldListLoading,
+      getLocalModList,
+      isLocalModListLoading,
+      getResourcePackList,
+      isResourcePackListLoading,
+      getServerResourcePackList,
+      isServerResourcePackListLoading,
+      getSchematicList,
+      isSchematicListLoading,
+      getShaderPackList,
+      isShaderPackListLoading,
+      getScreenshotList,
+      isScreenshotListLoading,
+      handleRetrieveInstanceSubdirPath,
+      handleImportResource,
+      handleUpdateInstanceConfig,
+      handleResetInstanceGameConfig,
+    ]
+  );
+
   return (
-    <InstanceContext.Provider
-      value={{
-        instanceId: instanceId,
-        summary: instanceSummary,
-        updateSummaryInContext,
-        gameConfig: instanceGameConfig,
-        openInstanceSubdir,
-        getWorldList,
-        isWorldListLoading,
-        getLocalModList,
-        isLocalModListLoading,
-        getResourcePackList,
-        isResourcePackListLoading,
-        getServerResourcePackList,
-        isServerResourcePackListLoading,
-        getSchematicList,
-        isSchematicListLoading,
-        getShaderPackList,
-        isShaderPackListLoading,
-        getScreenshotList,
-        isScreenshotListLoading,
-        // getInstanceGameConfig,
-        handleRetrieveInstanceSubdirPath,
-        handleImportResource,
-        handleUpdateInstanceConfig,
-        handleResetInstanceGameConfig,
-      }}
-    >
+    <InstanceContext.Provider value={providerValue}>
       {children}
     </InstanceContext.Provider>
   );

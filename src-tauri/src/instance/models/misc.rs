@@ -261,7 +261,7 @@ pub enum InstanceError {
   InstallProfileParseError,
   ModLoaderVersionParseError,
   ModpackManifestParseError,
-  CurseForgeFileManifestParseError,
+  ModpackFileManifestParseError,
   NetworkError,
   UnsupportedModLoader,
   NotSupportChangeModLoader,

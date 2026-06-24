@@ -1,4 +1,4 @@
-import { Button, HStack, Icon, Text, VStack } from "@chakra-ui/react";
+﻿import { Button, HStack, Icon, Text, VStack } from "@chakra-ui/react";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { useRouter } from "next/router";
 import React, { useCallback } from "react";

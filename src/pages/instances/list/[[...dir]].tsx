@@ -9,6 +9,7 @@ import {
   MenuItemOption,
   MenuList,
   MenuOptionGroup,
+  Portal,
   Text,
   Tooltip,
 } from "@chakra-ui/react";
@@ -98,26 +99,30 @@ const InstanceListPage = () => {
           icon={<LuListFilter />}
         ></MenuButton>
       </Tooltip>
-      <MenuList>
-        <MenuOptionGroup
-          title={t("AllInstancesPage.sortBy")}
-          type="radio"
-          value={selectedSortByType}
-          onChange={(s) => {
-            update("states.allInstancesPage.sortBy", s as string);
-            getInstanceList(true);
-          }}
-        >
-          {sortByTypeList.map((item) => (
-            <MenuItemOption key={item.key} value={item.key} fontSize="xs">
-              <HStack spacing={2}>
-                {item.icon}
-                <Text>{t(`AllInstancesPage.sortByTypeList.${item.key}`)}</Text>
-              </HStack>
-            </MenuItemOption>
-          ))}
-        </MenuOptionGroup>
-      </MenuList>
+      <Portal>
+        <MenuList zIndex={9999}>
+          <MenuOptionGroup
+            title={t("AllInstancesPage.sortBy")}
+            type="radio"
+            value={selectedSortByType}
+            onChange={(s) => {
+              update("states.allInstancesPage.sortBy", s as string);
+              getInstanceList(true);
+            }}
+          >
+            {sortByTypeList.map((item) => (
+              <MenuItemOption key={item.key} value={item.key} fontSize="xs">
+                <HStack spacing={2}>
+                  {item.icon}
+                  <Text>
+                    {t(`AllInstancesPage.sortByTypeList.${item.key}`)}
+                  </Text>
+                </HStack>
+              </MenuItemOption>
+            ))}
+          </MenuOptionGroup>
+        </MenuList>
+      </Portal>
     </Menu>
   );
 

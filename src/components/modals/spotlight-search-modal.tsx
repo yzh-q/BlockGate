@@ -40,7 +40,7 @@ import { generateInstanceDesc } from "@/utils/instance";
 import { translateTag } from "@/utils/resource";
 
 interface SearchResult {
-  type: "page" | "instance" | "player" | "curseforge" | "modrinth";
+  type: "page" | "instance" | "player" | "modrinth";
   icon?: string | React.ReactNode;
   title: string;
   description: string;
@@ -84,10 +84,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
 
   const convertResourceToSearchResult = useCallback(
     (resource: OtherResourceInfo): SearchResult => ({
-      type:
-        resource.source === OtherResourceSource.CurseForge
-          ? "curseforge"
-          : "modrinth",
+      type: "modrinth",
       icon: resource.iconSrc,
       title: resource.name,
       translatedTitle: resource.translatedName,
@@ -196,9 +193,9 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
       ];
 
       const createResult =
-        (platform: "curseforge" | "modrinth", source: OtherResourceSource) =>
+        (source: OtherResourceSource) =>
         (type: OtherResourceType): SearchResult => ({
-          type: platform,
+          type: "modrinth",
           description: "",
           title: t(`SpotlightSearchModal.resource.${type}`, { query }),
           action: () =>
@@ -217,12 +214,9 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
         });
 
       const resourceSearchResults: SearchResult[] = [
-        ...resourceTypes.map(
-          createResult("curseforge", OtherResourceSource.CurseForge)
-        ),
         ...resourceTypes
           .filter((type) => type !== OtherResourceType.World) // Modrinth doesn't host worlds
-          .map(createResult("modrinth", OtherResourceSource.Modrinth)),
+          .map(createResult(OtherResourceSource.Modrinth)),
       ];
 
       return resourceSearchResults;
@@ -251,7 +245,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
         OtherResourceType.ResourcePack,
         OtherResourceType.ShaderPack,
       ];
-      const sources = Object.values(OtherResourceSource);
+      const sources = [OtherResourceSource.Modrinth];
 
       try {
         const searchPromises = priorityResourceTypes.flatMap((resourceType) =>
@@ -263,9 +257,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
               query,
               "All",
               "All",
-              source === OtherResourceSource.CurseForge
-                ? "Popularity"
-                : "downloads",
+              "downloads",
               source,
               0,
               RESOURCES_PER_REQUEST
@@ -306,14 +298,11 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
           }
         });
 
-        const cfResults = results
-          .filter((res) => res.source === OtherResourceSource.CurseForge)
-          .slice(0, MAX_SEARCH_RESULTS);
         const mrResults = results
           .filter((res) => res.source === OtherResourceSource.Modrinth)
           .slice(0, MAX_SEARCH_RESULTS);
 
-        return [...cfResults, ...mrResults];
+        return mrResults;
       } catch (error) {
         if (!signal?.aborted) {
           logger.error("Network search error:", error);
@@ -505,7 +494,7 @@ const SpotlightSearchModal: React.FC<Omit<ModalProps, "children">> = ({
           {!queryText && (
             <Center h="6rem">
               <Text className="secondary-text">
-                ✨&nbsp;{t("SpotlightSearchModal.tip")}
+                {t("SpotlightSearchModal.tip")}
               </Text>
             </Center>
           )}

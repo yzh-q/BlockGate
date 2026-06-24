@@ -12,20 +12,28 @@ use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_http::reqwest;
 
-type SourceTuple = (&'static str, &'static str, fn(&str, &str) -> String);
+type SourceTuple = (
+  &'static str,
+  &'static str,
+  &'static str,
+  fn(&str, &str) -> String,
+);
 const SOURCES: [SourceTuple; 2] = [
   (
-    "https://mc.sjtu.cn/api-sjmcl/releases/latest",
+    "http://gx.shenkongyun.cn/api/latest",
     "version",
-    |_, fname| format!("https://mc.sjtu.cn/sjmcl/releases/{}", fname),
+    "file_name",
+    |_, fname| format!("http://gx.shenkongyun.cn/files/{}", fname),
   ),
   (
-    "https://api.github.com/repos/UNIkeEN/SJMCL/releases/latest",
+    "https://api.github.com/repos/UNIkeEN/BlockGate/releases/latest",
     "tag_name",
+    "name",
     |ver, fname| {
       format!(
-        "https://github.com/UNIkeEN/SJMCL/releases/download/v{}/{}",
-        ver, fname
+        "https://github.com/UNIkeEN/BlockGate/releases/download/v{}/{}",
+        ver.trim_start_matches('v'),
+        fname
       )
     },
   ),
@@ -46,7 +54,7 @@ fn build_resource_filename(ver: &str, os: &str, arch: &str, is_portable: bool) -
     "macos" => ".app.tar.gz",
     _ => "",
   };
-  format!("SJMCL_{}_{}_{}{}", ver, os, arch, suffix)
+  format!("BlockGate_{}_{}_{}{}", ver, os, arch, suffix)
 }
 
 // Generate the new filename on the local disk.
@@ -80,22 +88,44 @@ pub async fn fetch_latest_version(
   let client = app.state::<reqwest::Client>();
 
   let mut sources = SOURCES;
-  // If not in China (mainland), firstly try GitHub.
+  // If in China (mainland), firstly try Chinese server; otherwise try GitHub first.
   if !is_china_mainland_ip {
     sources.reverse();
   }
 
-  for (endpoint, field, _) in sources {
+  for (endpoint, version_field, fname_field, _) in sources {
     if let Ok(resp) = client.get(endpoint).send().await {
       if let Ok(j) = resp.json::<Value>().await {
-        if let Some(mut ver) = j.get(field).and_then(|v| v.as_str()).map(|s| s.to_string()) {
+        if let Some(mut ver) = j
+          .get(version_field)
+          .and_then(|v| v.as_str())
+          .map(|s| s.to_string())
+        {
           if ver.starts_with('v') {
             ver.remove(0);
           }
-          let fname = build_resource_filename(&ver, os.as_str(), arch.as_str(), is_portable);
+
+          // Get filename - for Chinese server use file_name from API, for GitHub build it
+          let fname = if fname_field == "file_name" {
+            j.get(fname_field)
+              .and_then(|v| v.as_str())
+              .map(|s| s.to_string())
+              .unwrap_or_else(|| {
+                build_resource_filename(&ver, os.as_str(), arch.as_str(), is_portable)
+              })
+          } else {
+            // GitHub: use name field or build filename
+            j.get(fname_field)
+              .and_then(|v| v.as_str())
+              .map(|s| s.to_string())
+              .unwrap_or_else(|| {
+                build_resource_filename(&ver, os.as_str(), arch.as_str(), is_portable)
+              })
+          };
 
           let release_notes = j
-            .get("body")
+            .get("release_notes")
+            .or_else(|| j.get("body"))
             .and_then(|v| v.as_str())
             .unwrap_or_default()
             .to_string();
@@ -128,37 +158,30 @@ pub async fn download_target_version(
     )
   };
 
-  let client = app.state::<reqwest::Client>();
-
   let mut sources = SOURCES;
   if !is_china_mainland_ip {
     sources.reverse();
   }
 
-  for (endpoint, _, mk_url) in sources {
-    if let Ok(resp) = client.get(endpoint).send().await {
-      if resp.status().is_success() {
-        let url = mk_url(&version, &fname);
+  // Use the first source's URL constructor
+  let (_, _, _, mk_url) = sources[0];
 
-        schedule_progressive_task_group(
-          app.clone(),
-          format!("launcher-update?{}", fname),
-          vec![PTaskParam::Download(DownloadParam {
-            src: url::Url::parse(&url).map_err(|_| LauncherConfigError::FetchError)?,
-            dest: download_cache_dir.join(&fname),
-            filename: Some(fname),
-            sha1: None,
-          })],
-          true,
-        )
-        .await?;
+  let url = mk_url(&version, &fname);
 
-        return Ok(());
-      }
-    }
-  }
+  schedule_progressive_task_group(
+    app.clone(),
+    format!("launcher-update?{}", fname),
+    vec![PTaskParam::Download(DownloadParam {
+      src: url::Url::parse(&url).map_err(|_| LauncherConfigError::FetchError)?,
+      dest: download_cache_dir.join(&fname),
+      filename: Some(fname),
+      sha1: None,
+    })],
+    true,
+  )
+  .await?;
 
-  Err(LauncherConfigError::FetchError.into())
+  Ok(())
 }
 
 #[cfg(target_os = "windows")]

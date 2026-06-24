@@ -8,6 +8,7 @@ import {
   MenuListProps,
   MenuOptionGroup,
   MenuProps,
+  Portal,
 } from "@chakra-ui/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -85,28 +86,40 @@ export const MenuSelector: React.FC<MenuSelectorProps> = ({
       >
         {renderButtonLabel()}
       </MenuButton>
-      <MenuList {...menuListProps}>
-        <MenuOptionGroup
-          type={multiple ? "checkbox" : "radio"}
-          value={value ?? (multiple ? [] : "")}
-          onChange={(val) => {
-            if (multiple) {
-              onSelect(Array.isArray(val) ? val : []);
-            } else {
-              onSelect(typeof val === "string" ? val : null);
-            }
-          }}
+      <Portal>
+        <MenuList
+          zIndex={9999}
+          bg="rgba(255, 255, 255, 0.92)"
+          backdropFilter="blur(30px) saturate(180%)"
+          borderColor="rgba(0, 0, 0, 0.1)"
+          boxShadow="0 12px 40px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.06)"
+          borderRadius="xl"
+          maxH="50vh"
+          overflowY="auto"
+          {...menuListProps}
         >
-          {options.map((opt, i) => {
-            const { value: v, label } = buildOptions(opt);
-            return (
-              <MenuItemOption key={i} value={v} fontSize={fontSize}>
-                {label}
-              </MenuItemOption>
-            );
-          })}
-        </MenuOptionGroup>
-      </MenuList>
+          <MenuOptionGroup
+            type={multiple ? "checkbox" : "radio"}
+            value={value ?? (multiple ? [] : "")}
+            onChange={(val) => {
+              if (multiple) {
+                onSelect(Array.isArray(val) ? val : []);
+              } else {
+                onSelect(typeof val === "string" ? val : null);
+              }
+            }}
+          >
+            {options.map((opt, i) => {
+              const { value: v, label } = buildOptions(opt);
+              return (
+                <MenuItemOption key={i} value={v} fontSize={fontSize}>
+                  {label}
+                </MenuItemOption>
+              );
+            })}
+          </MenuOptionGroup>
+        </MenuList>
+      </Portal>
     </Menu>
   );
 };

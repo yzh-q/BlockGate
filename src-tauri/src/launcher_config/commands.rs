@@ -5,6 +5,10 @@ use crate::launcher_config::helpers::java::{
   build_mojang_java_download_params, get_java_info_from_command, get_java_info_from_release_file,
   refresh_and_update_javas,
 };
+use crate::launcher_config::helpers::third_party_java::{
+  build_third_party_java_download_params, fetch_bellsoft_java_releases,
+  fetch_temurin_java_releases, fetch_zulu_java_releases, JavaVendor, ThirdPartyJavaRelease,
+};
 use crate::launcher_config::helpers::updater::{
   self, download_target_version, fetch_latest_version,
 };
@@ -396,4 +400,46 @@ pub async fn install_launcher_update(
   {
     Ok(()) // No supported
   }
+}
+
+#[tauri::command]
+pub async fn fetch_third_party_java_releases(
+  app: AppHandle,
+  vendor: String,
+  major_version: Option<i32>,
+) -> SJMCLResult<Vec<ThirdPartyJavaRelease>> {
+  let vendor_type = match vendor.to_lowercase().as_str() {
+    "zulu" => JavaVendor::Zulu,
+    "bellsoft" => JavaVendor::BellSoft,
+    "temurin" => JavaVendor::Temurin,
+    _ => return Err(LauncherConfigError::JavaExecInvalid.into()),
+  };
+
+  match vendor_type {
+    JavaVendor::Zulu => fetch_zulu_java_releases(&app, major_version).await,
+    JavaVendor::BellSoft => fetch_bellsoft_java_releases(&app, major_version).await,
+    JavaVendor::Temurin => fetch_temurin_java_releases(&app, major_version).await,
+  }
+}
+
+#[tauri::command]
+pub async fn download_third_party_java(
+  app: AppHandle,
+  release: ThirdPartyJavaRelease,
+) -> SJMCLResult<()> {
+  let download_params = build_third_party_java_download_params(&app, &release).await?;
+
+  schedule_progressive_task_group(
+    app,
+    format!(
+      "third-party-java?{}-{}",
+      release.vendor.to_string().to_lowercase(),
+      release.major_version
+    ),
+    download_params,
+    true,
+  )
+  .await?;
+
+  Ok(())
 }

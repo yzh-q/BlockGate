@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useToast } from "@/contexts/toast";
@@ -51,12 +52,15 @@ export const LauncherConfigContextProvider: React.FC<{
   );
 
   // 判断是否应该显示赞助提示
-  const shouldShowSponsorRemind =
-    config.sponsor &&
-    !config.sponsor.verified &&
-    config.runCount >= 3 &&
-    config.sponsor.lastRemindRunCount !== undefined &&
-    config.runCount - config.sponsor.lastRemindRunCount >= 3;
+  const shouldShowSponsorRemind = useMemo(
+    () =>
+      config.sponsor &&
+      !config.sponsor.verified &&
+      config.runCount >= 3 &&
+      config.sponsor.lastRemindRunCount !== undefined &&
+      config.runCount - config.sponsor.lastRemindRunCount >= 3,
+    [config.sponsor, config.runCount]
+  );
 
   // 标记赞助提示已显示
   const markSponsorRemindShown = useCallback(() => {
@@ -197,19 +201,29 @@ export const LauncherConfigContextProvider: React.FC<{
     return () => clearTimeout(timer);
   }, [handleCheckLauncherUpdate]);
 
+  const providerValue = useMemo(
+    () => ({
+      config,
+      setConfig,
+      update: handleUpdateLauncherConfig,
+      newerVersion,
+      getJavaInfos,
+      handleCheckLauncherUpdate,
+      shouldShowSponsorRemind,
+      markSponsorRemindShown,
+    }),
+    [
+      config,
+      newerVersion,
+      getJavaInfos,
+      handleCheckLauncherUpdate,
+      shouldShowSponsorRemind,
+      markSponsorRemindShown,
+    ]
+  );
+
   return (
-    <LauncherConfigContext.Provider
-      value={{
-        config,
-        setConfig,
-        update: handleUpdateLauncherConfig,
-        newerVersion,
-        getJavaInfos,
-        handleCheckLauncherUpdate,
-        shouldShowSponsorRemind,
-        markSponsorRemindShown,
-      }}
-    >
+    <LauncherConfigContext.Provider value={providerValue}>
       <ColorModeScript initialColorMode={userSelectedColorMode} />
       {children}
     </LauncherConfigContext.Provider>

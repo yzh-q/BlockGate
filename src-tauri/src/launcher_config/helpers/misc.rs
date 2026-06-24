@@ -5,6 +5,7 @@ use crate::partial::{PartialAccess, PartialUpdate};
 use crate::utils::portable::extract_assets;
 use crate::{APP_DATA_DIR, IS_PORTABLE};
 use rand::Rng;
+use semver::Version;
 use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
@@ -108,6 +109,13 @@ impl LauncherConfig {
       allow_full_login_feature: false,
     };
 
+    // Cleanup old launcher versions on startup (for portable mode)
+    if *IS_PORTABLE {
+      if let Ok(cur_exe) = std::env::current_exe() {
+        cleanup_old_launcher_versions(&self.basic_info.launcher_version, &cur_exe);
+      }
+    }
+
     Ok(())
   }
 
@@ -124,6 +132,68 @@ impl LauncherConfig {
 
     for (key, value) in backup_values {
       let _ = self.update(key, &value);
+    }
+  }
+}
+
+/// Cleanup old launcher versions on startup
+/// Scans the launcher directory for older BlockGate versions and removes them
+pub fn cleanup_old_launcher_versions(current_version: &str, current_exe: &PathBuf) {
+  let current = match Version::parse(current_version) {
+    Ok(v) => v,
+    Err(_) => return, // Skip cleanup if current version can't be parsed
+  };
+
+  let exe_dir = match current_exe.parent() {
+    Some(dir) => dir,
+    None => return,
+  };
+
+  // Scan for BlockGate_*.exe files (excluding current exe and installer files)
+  if let Ok(entries) = fs::read_dir(exe_dir) {
+    for entry in entries.flatten() {
+      let path = entry.path();
+      if path.extension().and_then(|s| s.to_str()) != Some("exe") {
+        continue;
+      }
+
+      // Skip if it's the current running exe
+      if path == *current_exe {
+        continue;
+      }
+
+      let filename = match path.file_name().and_then(|s| s.to_str()) {
+        Some(name) => name,
+        None => continue,
+      };
+
+      // Only process BlockGate_*.exe files (not BlockGate_setup.exe or BlockGate_portable.exe)
+      if !filename.starts_with("BlockGate_")
+        || filename.contains("_setup")
+        || filename.contains("_portable")
+      {
+        continue;
+      }
+
+      // Extract version from filename: BlockGate_1.2.5.exe -> 1.2.5
+      let version_str = if let Some(stripped) = filename.strip_prefix("BlockGate_") {
+        stripped.trim_end_matches(".exe")
+      } else {
+        continue;
+      };
+
+      if let Ok(ver) = Version::parse(version_str) {
+        if ver < current {
+          log::info!(
+            "Removing old launcher version: {} (current: {})",
+            path.display(),
+            current
+          );
+          if let Err(e) = fs::remove_file(&path) {
+            log::warn!("Failed to remove old launcher {}: {}", path.display(), e);
+          }
+        }
+      }
     }
   }
 }

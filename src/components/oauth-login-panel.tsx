@@ -1,4 +1,4 @@
-import { Button, Card, Heading, Text, VStack } from "@chakra-ui/react";
+﻿import { Button, Card, Heading, Text, VStack } from "@chakra-ui/react";
 import { t } from "i18next";
 import { useLauncherConfig } from "@/contexts/config";
 import { useToast } from "@/contexts/toast";

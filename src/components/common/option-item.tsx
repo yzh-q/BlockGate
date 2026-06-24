@@ -2,22 +2,18 @@ import {
   Box,
   BoxProps,
   Button,
-  Card,
   Divider,
   Flex,
   HStack,
   Skeleton,
   Text,
-  TextProps,
   VStack,
   Wrap,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Section, SectionProps } from "@/components/common/section";
 import { useLauncherConfig } from "@/contexts/config";
-import { useThemedCSSStyle } from "@/hooks/themed-css";
 
 export interface OptionItemProps extends Omit<BoxProps, "title"> {
   prefixElement?: React.ReactNode;
@@ -59,26 +55,20 @@ export const OptionItem: React.FC<OptionItemProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const palettes = useColorModeValue([100, 200, 300], [900, 800, 700]);
-
-  const titleLineClampProps: TextProps = {
-    noOfLines: maxTitleLines,
-    sx: {
-      wordBreak: "break-all",
-    },
-  };
-
-  const descriptionLineClampProps: TextProps = {
-    noOfLines: maxDescriptionLines,
-    sx: {
-      wordBreak: "break-all",
-    },
-  };
+  const titleProps = maxTitleLines
+    ? { noOfLines: maxTitleLines, sx: { wordBreak: "break-all" as const } }
+    : {};
+  const descriptionProps = maxDescriptionLines
+    ? {
+        noOfLines: maxDescriptionLines,
+        sx: { wordBreak: "break-all" as const },
+      }
+    : {};
 
   const _title =
     typeof title === "string" ? (
       <Skeleton isLoaded={!isLoading}>
-        <Text fontSize="xs-sm" {...(maxTitleLines ? titleLineClampProps : {})}>
+        <Text fontSize="xs-sm" color="gray.800" {...titleProps}>
           {title}
         </Text>
       </Skeleton>
@@ -90,8 +80,8 @@ export const OptionItem: React.FC<OptionItemProps> = ({
     titleExtra &&
     (isLoading ? (
       <Skeleton isLoaded={!isLoading}>
-        <Text fontSize="xs-sm">
-          PLACEHOLDER {/*width holder for skeleton*/}
+        <Text fontSize="xs-sm" color="gray.500">
+          PLACEHOLDER
         </Text>
       </Skeleton>
     ) : (
@@ -102,7 +92,7 @@ export const OptionItem: React.FC<OptionItemProps> = ({
     (childrenOnHover ? isHovered : true) &&
     (typeof children === "string" ? (
       <Skeleton isLoaded={!isLoading}>
-        <Text fontSize="xs-sm" className="secondary-text">
+        <Text fontSize="xs-sm" color="gray.500">
           {children}
         </Text>
       </Skeleton>
@@ -119,17 +109,17 @@ export const OptionItem: React.FC<OptionItemProps> = ({
         overflow="hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        borderRadius="md"
+        borderRadius="lg"
+        p={isFullClickZone ? 2 : 0.5}
+        transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
         _hover={{
-          bg: isFullClickZone ? `gray.${palettes[0]}` : "inherit",
-          transition: "background-color 0.2s ease-in-out",
+          bg: isFullClickZone ? "rgba(10, 132, 255, 0.06)" : "inherit",
+          transform: isFullClickZone ? "translateX(2px)" : "none",
         }}
         _active={{
-          bg: isFullClickZone ? `gray.${palettes[1]}` : "inherit",
-          transition: "background-color 0.1s ease-in-out",
+          bg: isFullClickZone ? "rgba(10, 132, 255, 0.12)" : "inherit",
         }}
         cursor={isFullClickZone ? "pointer" : "default"}
-        p={0.5}
         {...boxProps}
       >
         <HStack spacing={2.5} overflow="hidden">
@@ -162,8 +152,9 @@ export const OptionItem: React.FC<OptionItemProps> = ({
                 <Skeleton isLoaded={!isLoading}>
                   <Text
                     fontSize="xs"
-                    className="secondary-text"
-                    {...(maxDescriptionLines ? descriptionLineClampProps : {})}
+                    color="gray.500"
+                    lineHeight="1.5"
+                    {...descriptionProps}
                   >
                     {description}
                   </Text>
@@ -191,7 +182,6 @@ export const OptionItemGroup: React.FC<OptionItemGroupProps> = ({
   const { t } = useTranslation();
   const { config } = useLauncherConfig();
   const primaryColor = config.appearance.theme.primaryColor;
-  const themedStyles = useThemedCSSStyle();
   const [showAll, setShowAll] = useState(false);
 
   function isOptionItemProps(item: any): item is OptionItemProps {
@@ -217,7 +207,15 @@ export const OptionItemGroup: React.FC<OptionItemGroupProps> = ({
         <React.Fragment key={index}>
           {isOptionItemProps(item) ? <OptionItem {...item} /> : item}
           {index !== visibleItems.length - 1 &&
-            (withDivider ? <Divider my={1.5} /> : <Box h={1.5} />)}
+            (withDivider ? (
+              <Divider
+                my={1.5}
+                borderColor="rgba(0, 0, 0, 0.06)"
+                borderWidth="1px"
+              />
+            ) : (
+              <Box h={1.5} />
+            ))}
         </React.Fragment>
       ))}
       {hasShowAllBtn && (
@@ -231,6 +229,16 @@ export const OptionItemGroup: React.FC<OptionItemGroupProps> = ({
             mt={1.5}
             ml={-1.5}
             disabled={!enableShowAll}
+            borderRadius="lg"
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            _hover={{
+              bg: `rgba(10, 132, 255, 0.08)`,
+              transform: "translateY(-1px)",
+            }}
+            _active={{
+              bg: `rgba(10, 132, 255, 0.15)`,
+              transform: "translateY(0)",
+            }}
           >
             {t("OptionItemGroup.button.showAll", {
               left: items.length - maxFirstVisibleItems,
@@ -245,9 +253,18 @@ export const OptionItemGroup: React.FC<OptionItemGroupProps> = ({
     <Section {...props}>
       {items.length > 0 &&
         (withInCard ? (
-          <Card className={themedStyles.card["card-front"]} py={2.5}>
+          <Box
+            bg="rgba(255, 255, 255, 0.65)"
+            border="1px solid rgba(255, 255, 255, 0.7)"
+            borderRadius="2xl"
+            backdropFilter="blur(40px) saturate(200%)"
+            boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(255, 255, 255, 0.5) inset"
+            py={3}
+            px={4}
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+          >
             {renderItems()}
-          </Card>
+          </Box>
         ) : (
           renderItems()
         ))}

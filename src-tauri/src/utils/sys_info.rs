@@ -17,7 +17,7 @@ use tauri_plugin_os::locale;
 /// ```
 pub async fn send_statistics(version: String, os: String) {
   _ = reqwest::Client::new()
-    .post("https://mc.sjtu.cn/api-sjmcl/statistics")
+    .post("http://gx.shenkongyun.cn/api/statistics")
     .json(&json!({
       "version": version,
       "os": os,

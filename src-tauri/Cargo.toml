@@ -1,6 +1,6 @@
 [package]
 name = "blockgate"
-version = "1.2.0"
+version = "1.2.6"
 description = "A Minecraft launcher"
 authors = ["BlockGate Team"]
 license = "GPLv3"

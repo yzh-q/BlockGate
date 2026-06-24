@@ -76,12 +76,11 @@ impl TerracottaProvider {
 
   fn create_temp_file() -> SJMCLResult<PathBuf> {
     let temp_dir = std::env::temp_dir();
-    let temp_file_name = format!("terracotta_port_{}.json", std::process::id());
+    let temp_file_name = format!("terracotta_port_{}.txt", std::process::id());
     Ok(temp_dir.join(temp_file_name))
   }
 
   async fn read_port_from_file(file_path: &PathBuf) -> SJMCLResult<u16> {
-    // 等待文件出现
     log::info!("Waiting for port file to be created: {:?}", file_path);
     for i in 0..30 {
       if file_path.exists() {
@@ -99,15 +98,22 @@ impl TerracottaProvider {
       return Err(SJMCLError("Terracotta 端口文件未生成".into()));
     }
 
-    // 读取文件内容
     log::info!("Reading port file content...");
     let content = tokio::fs::read_to_string(file_path).await?;
-    log::info!("Port file content: {}", content);
-    let json: Value = serde_json::from_str(&content)?;
+    log::info!("Port file raw content: {}", content);
 
-    if let Some(port) = json.get("port").and_then(|p| p.as_u64()) {
-      log::info!("Successfully extracted port: {}", port);
-      return Ok(port as u16);
+    let trimmed = content.trim();
+
+    if let Ok(port) = trimmed.parse::<u16>() {
+      log::info!("Successfully extracted port (plain text): {}", port);
+      return Ok(port);
+    }
+
+    if let Ok(json) = serde_json::from_str::<Value>(&content) {
+      if let Some(port) = json.get("port").and_then(|p| p.as_u64()) {
+        log::info!("Successfully extracted port (JSON): {}", port);
+        return Ok(port as u16);
+      }
     }
 
     Err(SJMCLError("无法从文件中获取 Terracotta 端口".into()))

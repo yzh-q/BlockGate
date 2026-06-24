@@ -2,7 +2,11 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { LauncherConfig, VersionMetaInfo } from "@/models/config";
 import { InvokeResponse } from "@/models/response";
-import { JavaInfo } from "@/models/system-info";
+import {
+  JavaInfo,
+  JavaVendor,
+  ThirdPartyJavaRelease,
+} from "@/models/system-info";
 import { responseHandler } from "@/utils/response";
 
 /**
@@ -141,6 +145,35 @@ export class ConfigService {
     version: string
   ): Promise<InvokeResponse<void>> {
     return await invoke("download_mojang_java", { version });
+  }
+
+  /**
+   * FETCH available Java releases from third-party vendors.
+   * @param {JavaVendor} vendor - The vendor to fetch releases from (zulu, bellsoft, temurin)
+   * @param {number} majorVersion - Optional major version filter
+   * @returns {Promise<InvokeResponse<ThirdPartyJavaRelease[]>>}
+   */
+  @responseHandler("config")
+  static async fetchThirdPartyJavaReleases(
+    vendor: JavaVendor,
+    majorVersion?: number
+  ): Promise<InvokeResponse<ThirdPartyJavaRelease[]>> {
+    return await invoke("fetch_third_party_java_releases", {
+      vendor,
+      majorVersion,
+    });
+  }
+
+  /**
+   * DOWNLOAD a third-party Java release.
+   * @param {ThirdPartyJavaRelease} release - The release to download
+   * @returns {Promise<InvokeResponse<void>>}
+   */
+  @responseHandler("config")
+  static async downloadThirdPartyJava(
+    release: ThirdPartyJavaRelease
+  ): Promise<InvokeResponse<void>> {
+    return await invoke("download_third_party_java", { release });
   }
 
   /**

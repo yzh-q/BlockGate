@@ -1,6 +1,6 @@
 import { Button, Switch } from "@chakra-ui/react";
 import { appLogDir } from "@tauri-apps/api/path";
-import { openPath } from "@tauri-apps/plugin-opener";
+import { openPath, openUrl } from "@tauri-apps/plugin-opener";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MenuSelector } from "@/components/common/menu-selector";
@@ -209,6 +209,24 @@ const GeneralSettingsPage = () => {
               onClick={handleCheckUpdate}
             >
               {t("AboutSettingsPage.about.settings.version.checkUpdate")}
+            </Button>
+          ),
+        },
+        {
+          title: t("AboutSettingsPage.about.settings.basedOnSJMCL.title"),
+          description: t(
+            "AboutSettingsPage.about.settings.basedOnSJMCL.description"
+          ),
+          children: (
+            <Button
+              variant="subtle"
+              size="xs"
+              colorScheme={primaryColor}
+              onClick={() =>
+                openUrl("https://github.com/UNIkeEN/SJMCL/tree/main")
+              }
+            >
+              {t("General.open")}
             </Button>
           ),
         },

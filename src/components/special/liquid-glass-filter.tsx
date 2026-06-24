@@ -1,4 +1,4 @@
-// ref: https://github.com/lucasromerodb/liquid-glass-effect-macos
+﻿// ref: https://github.com/lucasromerodb/liquid-glass-effect-macos
 
 const LiquidGlassDistortionFilter: React.FC = () => (
   <svg style={{ position: "absolute", width: 0, height: 0 }}>

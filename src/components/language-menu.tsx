@@ -1,4 +1,4 @@
-import { MenuProps } from "@chakra-ui/react";
+﻿import { MenuProps } from "@chakra-ui/react";
 import React from "react";
 import { MenuSelector } from "@/components/common/menu-selector";
 import { useLauncherConfig } from "@/contexts/config";

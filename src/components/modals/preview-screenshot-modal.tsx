@@ -15,12 +15,11 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { LuCalendarDays, LuImagePlay } from "react-icons/lu";
+import { LuCalendarDays } from "react-icons/lu";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import { useLauncherConfig } from "@/contexts/config";
 import { useToast } from "@/contexts/toast";
 import { ScreenshotInfo } from "@/models/instance/misc";
-import { ConfigService } from "@/services/config";
 import { UNIXToDatetime } from "@/utils/datetime";
 import { shareFile } from "@/utils/share";
 
@@ -33,27 +32,8 @@ const PreviewScreenshotModal: React.FC<PreviewScreenshotModalProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const { update, config } = useLauncherConfig();
+  const { config } = useLauncherConfig();
   const toast = useToast();
-
-  const handleSetAsBackground = () => {
-    ConfigService.addCustomBackground(screenshot.filePath).then((response) => {
-      if (response.status === "success") {
-        // set selected background to the new added one.
-        update("appearance.background.choice", response.data);
-        toast({
-          title: response.message,
-          status: "success",
-        });
-      } else {
-        toast({
-          title: response.message,
-          description: response.details,
-          status: "error",
-        });
-      }
-    });
-  };
 
   const screenshotMenuOperations = [
     ...(config.basicInfo.osType === "macos"
@@ -72,12 +52,8 @@ const PreviewScreenshotModal: React.FC<PreviewScreenshotModalProps> = ({
         ]
       : []),
     {
-      icon: LuImagePlay,
-      label: t("ScreenshotPreviewModal.menu.setAsBg"),
-      onClick: handleSetAsBackground,
-    },
-    {
       icon: "revealFile",
+      label: t("ScreenshotPreviewModal.menu.revealFile"),
       onClick: () => {
         revealItemInDir(screenshot.filePath);
       },

@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -568,17 +569,27 @@ export const TaskContextProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [tasks]);
 
+  const providerValue = useMemo(
+    () => ({
+      tasks,
+      generalPercent,
+      handleScheduleProgressiveTaskGroup,
+      handleCancelProgressiveTaskGroup,
+      handleResumeProgressiveTaskGroup,
+      handleStopProgressiveTaskGroup,
+    }),
+    [
+      tasks,
+      generalPercent,
+      handleScheduleProgressiveTaskGroup,
+      handleCancelProgressiveTaskGroup,
+      handleResumeProgressiveTaskGroup,
+      handleStopProgressiveTaskGroup,
+    ]
+  );
+
   return (
-    <TaskContext.Provider
-      value={{
-        tasks,
-        generalPercent,
-        handleScheduleProgressiveTaskGroup,
-        handleCancelProgressiveTaskGroup,
-        handleResumeProgressiveTaskGroup,
-        handleStopProgressiveTaskGroup,
-      }}
-    >
+    <TaskContext.Provider value={providerValue}>
       {children}
     </TaskContext.Provider>
   );

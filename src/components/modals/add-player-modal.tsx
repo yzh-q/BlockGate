@@ -24,6 +24,7 @@ import {
   ModalHeader,
   ModalOverlay,
   ModalProps,
+  Portal,
   Text,
   VStack,
   useDisclosure,
@@ -440,16 +441,18 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                                 "AddPlayerModal.3rdparty.authServer.selectSource"
                               )}
                           </MenuButton>
-                          <MenuList>
-                            {authServerList.map((server: AuthServer) => (
-                              <MenuItem
-                                key={server.authUrl}
-                                onClick={() => setAuthServer(server)}
-                              >
-                                {server.name}
-                              </MenuItem>
-                            ))}
-                          </MenuList>
+                          <Portal>
+                            <MenuList zIndex={9999}>
+                              {authServerList.map((server: AuthServer) => (
+                                <MenuItem
+                                  key={server.authUrl}
+                                  onClick={() => setAuthServer(server)}
+                                >
+                                  {server.name}
+                                </MenuItem>
+                              ))}
+                            </MenuList>
+                          </Portal>
                         </Menu>
                         <Text className="secondary-text ellipsis-text">
                           {authServer?.authUrl}

@@ -94,7 +94,7 @@
       },
       "modpack": {
         "title": "モッドパックインポート",
-        "description": "ローカルファイル或はインタネットからモッドパックをインポート（ CurseForge、 Modrinth あるいは HMCL フォーマット）"
+        "description": "ローカルファイル或はインタネットからモッドパックをインポート（ Modrinth あるいは HMCL フォーマット）"
       },
       "manageDirs": {
         "title": "ゲームディレクトリ管理",
@@ -237,7 +237,7 @@
       "grid": "グリッドビュー",
       "list": "リストビュー"
     },
-      "sortByTypeList": {
+    "sortByTypeList": {
       "versionAsc": "バージョン順（古い順）",
       "versionDesc": "バージョン順（新しい順）",
       "name": "インスタンス名称"
@@ -480,9 +480,17 @@
       "version": "バージョン",
       "type": "タイプ"
     },
+    "search": {
+      "placeholder": "バージョンを検索..."
+    },
     "warning": {
-      "mojang": "Mojang によって配布される Java ランタイムは BlockGate によって特定のディレクトリにインストールされます",
-      "oracle": "Oracle ソースからのダウンロードにはログインの必要な場合があります"
+      "mojang": "Mojang によって配布される Java ランタイムは BlockGate によって特定のディレクトリにインストールされます"
+    },
+    "loading": "利用可能なバージョンを取得中...",
+    "noReleases": "バージョンが見つかりません、別のフィルターを試してください",
+    "openWebsite": "{{vendor}} ウェブサイトを訪問",
+    "error": {
+      "fetchFailed": "バージョンリストの取得に失敗しました"
     }
   },
   "DownloadModpackModal": {
@@ -915,7 +923,7 @@
         "error": "共有に失敗"
       }
     },
-        "skip": "スキップ",
+    "skip": "スキップ",
     "version": {
       "dev": "開発版",
       "nightly": "ナイトリービルド版",
@@ -1090,7 +1098,7 @@
     },
     "step3": {
       "title": "Minecraft、起動！",
-      "content": "インスタンスとキャラクターを選択し、関連設定を調整したら、起動ボタンをクリックしてゲームを楽しみましょう 🥳"
+      "content": "インスタンスとキャラクターを選択し、関連設定を調整したら、起動ボタンをクリックしてゲームを楽しみましょう"
     }
   },
   "HeadNavBar": {
@@ -1130,10 +1138,6 @@
         "mcMod": {
           "title": "MCMod",
           "description": "Minecraft に関するモッド情報を掲載したウェブサイト（中国語）"
-        },
-        "curseforge": {
-          "title": "CurseForge",
-          "description": "世界一番の Minecraft モッドライブラリ"
         }
       }
     },
@@ -1266,8 +1270,8 @@
       "manage": "MOD 管理"
     },
     "lastPlayed": {
-      "title": "前回プレイ",
-      "continuePlaying": "続きからプレイ"
+      "title": "最近のワールド",
+      "quickLaunch": "クイック起動"
     },
     "more": {
       "title": "その他"
@@ -1383,7 +1387,7 @@
       "javaPath": "Java 実行ファイルのパスを入力または選択してください"
     }
   },
-    "MCVersionNumberHelper": {
+  "MCVersionNumberHelper": {
     "content": "2026年より、Minecraftのバージョン番号は新しい命名規則を採用します。従来の1.x形式に代わり、西暦の下2桁をバージョン番号の先頭に配置します（例: 26.1）。",
     "linkText": "公式ドキュメントを読む",
     "url": "https://www.minecraft.net/zh-hans/article/minecraft-new-version-numbering-system"
@@ -1438,7 +1442,6 @@
       "title": "サービス接続テスト",
       "offline": "オフライン",
       "bmclapi": "BMCLAPI",
-      "curseforge": "CurseForge",
       "modrinth": "Modrinth",
       "mojang": "Mojang",
       "forge": "Forge",
@@ -1486,58 +1489,6 @@
       "search": "サーチ"
     },
     "modTagList": {
-      "CurseForge": {
-        "All": "すべて",
-        "Addons": "アドオン",
-        "Adventure and RPG": "冒険・RPG",
-        "API and Library": "API・ライブラリ",
-        "Applied Energistics 2": "Applied Energistics 2",
-        "Armor, Tools, and Weapons": "ツール・武器・防具",
-        "Automation": "自動化",
-        "Biomes": "バイオーム",
-        "Blood Magic": "Blood Magic",
-        "Buildcraft": "Buildcraft",
-        "Bug Fixes": "バグフィックス",
-        "Cosmetic": "デコレーション",
-        "CraftTweaker": "CraftTweaker",
-        "Create": "Create",
-        "Dimensions": "ディメンション",
-        "Education": "教育",
-        "Energy": "エネルギー",
-        "Energy, Fluid, and Item Transport": "エネルギー・流体・アイテム輸送",
-        "Farming": "農業",
-        "Food": "フード",
-        "Forestry": "Forestry",
-        "Galacticraft": "Galacticraft",
-        "Genetics": "遺伝学",
-        "Industrial Craft": "Industrial Craft",
-        "Integrated Dynamics": "Integrated Dynamics",
-        "KubeJS": "KubeJS",
-        "Magic": "魔法",
-        "Map and Information": "地図・情報",
-        "MCreator": "MCreator",
-        "Miscellaneous": "その他",
-        "Mobs": "モブ",
-        "Ores and Resources": "鉱石・資源",
-        "Performance": "パフォーマンス",
-        "Player Transport": "プレイヤー輸送",
-        "Processing": "加工処理",
-        "Redstone": "レッドストーン",
-        "Server Utility": "サーバー向け",
-        "Skyblock": "スカイブロック",
-        "Storage": "ストレージ",
-        "Structures": "構造物",
-        "Technology": "テクノロジー",
-        "Thaumcraft": "Thaumcraft",
-        "Thermal Expansion": "Thermal Expansion",
-        "Tinker's Construct": "Tinker's Construct",
-        "Twilight Forest": "Twilight Forest",
-        "Twitch Integration": "Twitch",
-        "Utility & QoL": "ユーティリティ・QoL",
-        "World Gen": "ワールド生成",
-        "Auxiliary": "補助モッド",
-        "World": "ワールド"
-      },
       "Modrinth": {
         "All": "すべて",
         "adventure": "冒険",
@@ -1562,41 +1513,19 @@
       }
     },
     "worldTagList": {
-      "CurseForge": {
+      "Modrinth": {
         "All": "すべて",
-        "Types": "タイプ",
-        "Adventure": "冒険",
-        "Creation": "創造",
-        "Game Map": "ミニゲーム",
-        "Modded World": "モッド",
-        "Parkour": "パルクール",
-        "Puzzle": "パズル",
-        "Survival": "サバイバル"
+        "adventure": "冒険",
+        "challenge": "チャレンジ",
+        "creation": "創造",
+        "game_map": "ミニゲーム",
+        "modded": "モッド",
+        "parkour": "パルクール",
+        "puzzle": "パズル",
+        "survival": "サバイバル"
       }
     },
     "resourcepackTagList": {
-      "CurseForge": {
-        "All": "すべて",
-        "Resolution": "解像度",
-        "16x": "16x",
-        "32x": "32x",
-        "64x": "64x",
-        "128x": "128x",
-        "256x": "256x",
-        "512x and Higher": "512x以上",
-        "Styles": "スタイル",
-        "Animated": "動画",
-        "Special": "特殊",
-        "Data Packs": "データパック",
-        "Font Packs": "フォントパック",
-        "Medieval": "中世",
-        "Miscellaneous": "その他",
-        "Mod Support": "モッドサポート",
-        "Modern": "モーデン",
-        "Photo Realistic": "写実",
-        "Steampunk": "スチームパンク",
-        "Traditional": "伝統的"
-      },
       "Modrinth": {
         "All": "すべて",
         "Resolution": "解像度",
@@ -1632,13 +1561,6 @@
       }
     },
     "shaderTagList": {
-      "CurseForge": {
-        "All": "すべて",
-        "Styles": "スタイル",
-        "Fantasy": "幻想",
-        "Realistic": "写実",
-        "Vanilla": "バニラ"
-      },
       "Modrinth": {
         "All": "すべて",
         "Styles": "スタイル",
@@ -1665,27 +1587,6 @@
       }
     },
     "modpackTagList": {
-      "CurseForge": {
-        "All": "すべて",
-        "Styles": "スタイル",
-        "Adventure and RPG": "冒険・RPG",
-        "Combat / PvP": "コンバット・PvP",
-        "Exploration": "探索",
-        "Extra Large": "大規模",
-        "FTB Official Pack": "FTB",
-        "Hardcore": "ハードコア",
-        "Horror": "ホラー",
-        "Magic": "魔法",
-        "Map Based": "マップ",
-        "Mini Game": "ミニゲーム",
-        "Multiplayer": "マルチプレイ",
-        "Quests": "クエスト",
-        "Sci-Fi": "SF",
-        "Skyblock": "Skyblock",
-        "Small / Light": "小規模",
-        "Tech": "テクノロジー",
-        "Vanilla+": "バニラ強化"
-      },
       "Modrinth": {
         "All": "すべて",
         "styles": "スタイル",
@@ -1702,18 +1603,6 @@
       }
     },
     "datapackTagList": {
-      "CurseForge": {
-        "All": "すべて",
-        "Styles": "スタイル",
-        "Magic": "魔法",
-        "Miscellaneous": "その他",
-        "Fantasy": "幻想",
-        "Mod Support": "モッドサポート",
-        "Tech": "テクノロジー",
-        "Library": "ライブラリ",
-        "Utility": "ユーティリティ",
-        "Adventure": "冒険"
-      },
       "Modrinth": {
         "All": "すべて",
         "styles": "スタイル",
@@ -1739,13 +1628,6 @@
       }
     },
     "sortByList": {
-      "CurseForge": {
-        "Popularity": "人気順",
-        "Latest update": "更新日時順",
-        "Creation date": "作成日順",
-        "Total downloads": "ダウンロード数順",
-        "A-Z": "名前順(A-Z)"
-      },
       "Modrinth": {
         "relevance": "関連度順",
         "downloads": "ダウンロード数順",
@@ -2460,7 +2342,6 @@
       "shader": "{{query}} に関するシェーダーパックを検索",
       "datapack": "{{query}} に関するデータパックを検索",
       "modpack": "{{query}} に関するモッドパックを検索",
-      "curseforge": "CurseForge で",
       "modrinth": "Modrinth で"
     },
     "result": {
@@ -2468,7 +2349,6 @@
       "recentViewed": "最近アクセス",
       "instance": "インスタンス",
       "player": "キャラクター",
-      "curseforge": "CurseForge で検索",
       "modrinth": "Modrinth で検索"
     }
   },

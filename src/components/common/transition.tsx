@@ -1,4 +1,4 @@
-import { Fade as ChakraFade, FadeProps } from "@chakra-ui/react";
+﻿import { Fade as ChakraFade, FadeProps } from "@chakra-ui/react";
 import { forwardRef } from "react";
 
 export const Fade = forwardRef<HTMLDivElement, FadeProps>((props, ref) => {

@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useLauncherConfig } from "@/contexts/config";
@@ -154,28 +155,42 @@ export const GlobalDataContextProvider: React.FC<{
     handleFetchGameVersionList
   );
 
+  const dataValue = useMemo(
+    () => ({
+      selectedPlayer,
+      selectedInstance,
+      getPlayerList,
+      getInstanceList,
+      getAuthServerList,
+      getGameVersionList,
+      isGameVersionListLoading,
+    }),
+    [
+      selectedPlayer,
+      selectedInstance,
+      getPlayerList,
+      getInstanceList,
+      getAuthServerList,
+      getGameVersionList,
+      isGameVersionListLoading,
+    ]
+  );
+
+  const dispatchValue = useMemo(
+    () => ({
+      setPlayerList,
+      setSelectedPlayer,
+      setInstanceList,
+      setSelectedInstance,
+      setAuthServerList,
+      setGameVersionList,
+    }),
+    []
+  );
+
   return (
-    <GlobalDataContext.Provider
-      value={{
-        selectedPlayer,
-        selectedInstance,
-        getPlayerList,
-        getInstanceList,
-        getAuthServerList,
-        getGameVersionList,
-        isGameVersionListLoading,
-      }}
-    >
-      <GlobalDataDispatchContext.Provider
-        value={{
-          setPlayerList,
-          setSelectedPlayer,
-          setInstanceList,
-          setSelectedInstance,
-          setAuthServerList,
-          setGameVersionList,
-        }}
-      >
+    <GlobalDataContext.Provider value={dataValue}>
+      <GlobalDataDispatchContext.Provider value={dispatchValue}>
         {children}
       </GlobalDataDispatchContext.Provider>
     </GlobalDataContext.Provider>

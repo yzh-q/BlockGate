@@ -1,6 +1,14 @@
 import {
+  Box,
   Button,
+  Card,
+  CardBody,
   Grid,
+  HStack,
+  IconButton,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -9,41 +17,31 @@ import {
   ModalHeader,
   ModalOverlay,
   ModalProps,
+  Spinner,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LuExternalLink } from "react-icons/lu";
+import { LuDownload, LuExternalLink, LuSearch, LuX } from "react-icons/lu";
 import { MenuSelector } from "@/components/common/menu-selector";
 import { useLauncherConfig } from "@/contexts/config";
 import { useToast } from "@/contexts/toast";
+import { JavaVendor, ThirdPartyJavaRelease } from "@/models/system-info";
 import { ConfigService } from "@/services/config";
 
-type VendorKey = "mojang" | "zulu" | "bellsoft" | "oracle";
+type VendorKey = "mojang" | "zulu" | "bellsoft" | "temurin";
 
-interface JavaVendor {
-  label: string;
-  hasJre: boolean;
-  archMap: Record<string, string>;
-  versions?: string[];
-  getUrl: (params: {
-    version: string;
-    os: string;
-    archParam: string;
-    type: "jdk" | "jre";
-  }) => string;
-}
-
-const buildDownloadUrl = (baseUrl: string, params: Record<string, string>) => {
-  const url = new URL(baseUrl);
-  Object.entries(params).forEach(([key, value]) => {
-    if (value) url.searchParams.set(key, value);
-  });
-  return url.toString();
+const VENDOR_LABELS: Record<VendorKey, string> = {
+  mojang: "Mojang",
+  zulu: "Zulu",
+  bellsoft: "BellSoft",
+  temurin: "Temurin",
 };
+
+const JAVA_VERSIONS = ["8", "11", "17", "21", "25"];
 
 export const DownloadJavaModal: React.FC<Omit<ModalProps, "children">> = ({
   ...props
@@ -53,71 +51,84 @@ export const DownloadJavaModal: React.FC<Omit<ModalProps, "children">> = ({
   const toast = useToast();
   const router = useRouter();
   const primaryColor = config.appearance.theme.primaryColor;
-  const os = config.basicInfo.osType;
-  const arch = config.basicInfo.arch;
 
   const [vendor, setVendor] = useState<VendorKey | "">("");
-  const [version, setVersion] = useState<"" | "8" | "11" | "17" | "21">("");
-  const [type, setType] = useState<"" | "jdk" | "jre">("");
+  const [version, setVersion] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [releases, setReleases] = useState<ThirdPartyJavaRelease[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedRelease, setSelectedRelease] =
+    useState<ThirdPartyJavaRelease | null>(null);
 
-  const VENDORS: Record<VendorKey, JavaVendor> = {
-    mojang: {
-      label: "Mojang",
-      hasJre: true,
-      archMap: { x86_64: "x64", aarch64: "arm64" },
-      versions: [...(os === "macos" ? [] : ["8"]), "17", "21", "25"],
-      getUrl: () => "",
-    },
-    zulu: {
-      label: "Zulu",
-      hasJre: true,
-      archMap: {
-        x86_64: "x86-64-bit",
-        aarch64: "arm-64-bit",
-      },
-      getUrl: ({ version, os, archParam, type }) => {
-        return (
-          buildDownloadUrl("https://www.azul.com/downloads/", {
-            version: `java-${version}-lts`,
-            os,
-            architecture: archParam,
-            package: type,
-            "show-old-builds": "true",
-          }) + "#zulu"
-        );
-      },
-    },
-    bellsoft: {
-      label: "BellSoft",
-      hasJre: true,
-      archMap: {
-        x86_64: "x86",
-        aarch64: "arm",
-      },
-      getUrl: ({ version, os, archParam, type }) => {
-        return buildDownloadUrl("https://bell-sw.com/pages/downloads/", {
-          version: `java-${version}`,
-          os,
-          package: type,
-          architecture: archParam,
+  // Fetch releases when vendor or version changes
+  useEffect(() => {
+    if (vendor && vendor !== "mojang") {
+      fetchReleases();
+    } else {
+      setReleases([]);
+      setSelectedRelease(null);
+    }
+  }, [vendor, version]);
+
+  const fetchReleases = async () => {
+    if (!vendor || vendor === "mojang") return;
+
+    setIsLoading(true);
+    setReleases([]);
+    setSelectedRelease(null);
+
+    try {
+      const majorVersion = version ? parseInt(version) : undefined;
+      const response = await ConfigService.fetchThirdPartyJavaReleases(
+        vendor as JavaVendor,
+        majorVersion
+      );
+
+      if (response.status === "success" && response.data) {
+        // Filter by search query if provided
+        let filtered = response.data;
+        if (searchQuery) {
+          filtered = filtered.filter(
+            (r) =>
+              r.fullVersion.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              r.fileName.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        // Sort by major version (descending), then by full version
+        filtered.sort((a, b) => {
+          if (a.majorVersion !== b.majorVersion) {
+            return b.majorVersion - a.majorVersion;
+          }
+          return b.fullVersion.localeCompare(a.fullVersion);
         });
-      },
-    },
-    oracle: {
-      label: "Oracle",
-      hasJre: false,
-      archMap: {},
-      getUrl: ({ version, os }) => {
-        const javaOrJdk = ["8", "11", "17"].includes(version) ? "java" : "jdk";
-        return `https://www.oracle.com/java/technologies/downloads/#${javaOrJdk}${version}-${os.replace("macos", "mac")}`;
-      },
-    },
+        setReleases(filtered);
+      } else {
+        toast({
+          title: response.message || t("DownloadJavaModal.error.fetchFailed"),
+          status: "error",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: t("DownloadJavaModal.error.fetchFailed"),
+        status: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    if (vendor && vendor !== "mojang") {
+      fetchReleases();
+    }
   };
 
   const handleConfirm = async () => {
-    if (!vendor || !version || !type) return;
+    if (!vendor) return;
 
     if (vendor === "mojang") {
+      if (!version) return;
       ConfigService.downloadMojangJava(version).then((res) => {
         if (res.status === "success") {
           router.push("/downloads");
@@ -129,49 +140,65 @@ export const DownloadJavaModal: React.FC<Omit<ModalProps, "children">> = ({
           });
         }
       });
-    } else {
-      const selectedVendor = VENDORS[vendor as VendorKey];
-      const archParam = selectedVendor.archMap[arch] || "";
-      const url = selectedVendor.getUrl({
-        version,
-        os,
-        archParam,
-        type: type as "jdk" | "jre",
+    } else if (selectedRelease) {
+      ConfigService.downloadThirdPartyJava(selectedRelease).then((res) => {
+        if (res.status === "success") {
+          router.push("/downloads");
+          props.onClose?.();
+        } else {
+          toast({
+            title: res.message,
+            status: "error",
+          });
+        }
       });
-      openUrl(url);
     }
-    props.onClose?.();
+  };
+
+  const handleOpenWebsite = () => {
+    if (!vendor || vendor === "mojang") return;
+
+    const urls: Record<VendorKey, string> = {
+      mojang: "",
+      zulu: "https://www.azul.com/downloads/",
+      bellsoft: "https://bell-sw.com/pages/downloads/",
+      temurin: "https://adoptium.net/",
+    };
+
+    openUrl(urls[vendor]);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "Unknown";
+    const mb = bytes / (1024 * 1024);
+    if (mb > 1024) {
+      return `${(mb / 1024).toFixed(1)} GB`;
+    }
+    return `${mb.toFixed(0)} MB`;
   };
 
   return (
-    <Modal size={{ base: "sm", lg: "md" }} {...props}>
+    <Modal size={{ base: "sm", lg: "lg" }} {...props}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{t("DownloadJavaModal.header.title")}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <VStack align="stretch">
-            <Grid templateColumns="1fr 1fr 1fr" gap={4} w="100%">
+          <VStack align="stretch" spacing={4}>
+            {/* Vendor and Version Selection */}
+            <Grid templateColumns="1fr 1fr" gap={4} w="100%">
               <MenuSelector
-                options={Object.entries(VENDORS).map(([key, val]) => ({
+                options={Object.entries(VENDOR_LABELS).map(([key, label]) => ({
                   value: key,
-                  label: val.label,
+                  label,
                 }))}
                 value={vendor}
                 onSelect={(val) => {
-                  const selected = val as VendorKey;
-                  if (!VENDORS[selected].hasJre) {
-                    setType("jdk");
-                  } else if (selected === "mojang") {
-                    setType("jre");
-                  }
-                  if (
-                    VENDORS[selected]?.versions &&
-                    !VENDORS[selected].versions.includes(version)
-                  ) {
+                  setVendor(val as VendorKey);
+                  setSelectedRelease(null);
+                  if (val === "mojang") {
                     setVersion("");
                   }
-                  setVendor(selected);
                 }}
                 placeholder={t("DownloadJavaModal.selector.vendor")}
                 size="sm"
@@ -180,41 +207,141 @@ export const DownloadJavaModal: React.FC<Omit<ModalProps, "children">> = ({
 
               <MenuSelector
                 options={
-                  VENDORS[vendor as VendorKey]?.versions || [
-                    "8",
-                    "11",
-                    "17",
-                    "21",
-                    "25",
-                  ]
+                  vendor === "mojang"
+                    ? JAVA_VERSIONS.filter((v) =>
+                        config.basicInfo.osType === "macos" ? v !== "8" : true
+                      )
+                    : JAVA_VERSIONS
                 }
                 value={version}
-                onSelect={(val) => setVersion(val as typeof version)}
+                onSelect={(val) =>
+                  setVersion(Array.isArray(val) ? (val[0] ?? "") : (val ?? ""))
+                }
                 placeholder={t("DownloadJavaModal.selector.version")}
-                size="sm"
-                fontSize="sm"
-              />
-
-              <MenuSelector
-                options={[
-                  { value: "jdk", label: "JDK" },
-                  ...(vendor && VENDORS[vendor as VendorKey]?.hasJre
-                    ? [{ value: "jre", label: "JRE" }]
-                    : []),
-                ]}
-                disabled={vendor === "mojang"}
-                value={type}
-                onSelect={(val) => setType(val as typeof type)}
-                placeholder={t("DownloadJavaModal.selector.type")}
                 size="sm"
                 fontSize="sm"
               />
             </Grid>
 
-            {["mojang", "oracle"].includes(vendor) && (
-              <Text color="gray.500">
-                {t(`DownloadJavaModal.warning.${vendor}`)}
+            {/* Search Box for Third-party Java */}
+            {vendor && vendor !== "mojang" && (
+              <InputGroup size="sm">
+                <InputLeftElement>
+                  <LuSearch />
+                </InputLeftElement>
+                <Input
+                  placeholder={t("DownloadJavaModal.search.placeholder")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                  }}
+                />
+                {searchQuery && (
+                  <IconButton
+                    aria-label="Clear search"
+                    icon={<LuX />}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setSearchQuery("");
+                      fetchReleases();
+                    }}
+                  />
+                )}
+              </InputGroup>
+            )}
+
+            {/* Mojang Warning */}
+            {vendor === "mojang" && (
+              <Text color="gray.500" fontSize="sm">
+                {t("DownloadJavaModal.warning.mojang")}
               </Text>
+            )}
+
+            {/* Third-party Java List */}
+            {vendor && vendor !== "mojang" && (
+              <Box maxH="300px" overflowY="auto">
+                {isLoading ? (
+                  <VStack py={4}>
+                    <Spinner size="sm" />
+                    <Text color="gray.500" fontSize="sm">
+                      {t("DownloadJavaModal.loading")}
+                    </Text>
+                  </VStack>
+                ) : releases.length > 0 ? (
+                  <VStack align="stretch" spacing={2}>
+                    {releases.map((release, index) => (
+                      <Card
+                        key={index}
+                        size="sm"
+                        cursor="pointer"
+                        variant={
+                          selectedRelease === release ? "filled" : "outline"
+                        }
+                        bg={
+                          selectedRelease === release
+                            ? `${primaryColor}.50`
+                            : "white"
+                        }
+                        borderColor={
+                          selectedRelease === release
+                            ? `${primaryColor}.500`
+                            : "gray.200"
+                        }
+                        onClick={() => setSelectedRelease(release)}
+                        _hover={{ borderColor: `${primaryColor}.300` }}
+                      >
+                        <CardBody py={2}>
+                          <HStack justify="space-between">
+                            <VStack align="start" spacing={0}>
+                              <Text fontWeight="medium" fontSize="sm">
+                                {release.isJre ? "JRE" : "JDK"}{" "}
+                                {release.majorVersion}
+                                {release.isLts && " (LTS)"}
+                              </Text>
+                              <Text color="gray.500" fontSize="xs">
+                                {release.fullVersion}
+                              </Text>
+                            </VStack>
+                            <VStack align="end" spacing={0}>
+                              <Text fontSize="sm">
+                                {formatFileSize(release.fileSize)}
+                              </Text>
+                              <Text color="gray.500" fontSize="xs">
+                                {release.architecture}
+                              </Text>
+                            </VStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </VStack>
+                ) : (
+                  <Text
+                    color="gray.500"
+                    fontSize="sm"
+                    textAlign="center"
+                    py={4}
+                  >
+                    {t("DownloadJavaModal.noReleases")}
+                  </Text>
+                )}
+              </Box>
+            )}
+
+            {/* External Link for Third-party */}
+            {vendor && vendor !== "mojang" && (
+              <Button
+                size="sm"
+                variant="ghost"
+                rightIcon={<LuExternalLink />}
+                onClick={handleOpenWebsite}
+              >
+                {t("DownloadJavaModal.openWebsite", {
+                  vendor: VENDOR_LABELS[vendor],
+                })}
+              </Button>
             )}
           </VStack>
         </ModalBody>
@@ -224,11 +351,15 @@ export const DownloadJavaModal: React.FC<Omit<ModalProps, "children">> = ({
           </Button>
           <Button
             colorScheme={primaryColor}
-            rightIcon={vendor !== "mojang" ? <LuExternalLink /> : undefined}
-            isDisabled={!(vendor && version && type)}
+            leftIcon={<LuDownload />}
+            isDisabled={
+              !vendor ||
+              (vendor === "mojang" && !version) ||
+              (vendor !== "mojang" && !selectedRelease)
+            }
             onClick={handleConfirm}
           >
-            {t("General.confirm")}
+            {t("General.download")}
           </Button>
         </ModalFooter>
       </ModalContent>

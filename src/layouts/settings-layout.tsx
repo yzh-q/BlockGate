@@ -33,8 +33,8 @@ const SettingsLayout: React.FC<SettingsLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <Grid templateColumns="1fr 3fr" gap={4} h="100%">
-      <GridItem className="content-full-y">
+    <Grid templateColumns="1fr 3fr" gap={4} minH="0" w="100%">
+      <GridItem>
         <VStack align="stretch" spacing={4}>
           {settingsDomainList.map((group, index) => (
             <NavMenu
@@ -58,7 +58,7 @@ const SettingsLayout: React.FC<SettingsLayoutProps> = ({ children }) => {
           ))}
         </VStack>
       </GridItem>
-      <GridItem className="content-full-y" key={router.asPath}>
+      <GridItem key={router.asPath}>
         <VStack align="stretch" spacing={4}>
           {children}
         </VStack>

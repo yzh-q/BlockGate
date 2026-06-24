@@ -101,7 +101,7 @@ const SponsorRemindModal: React.FC<SponsorRemindModalProps> = ({
     <Modal scrollBehavior="inside" size="xl" {...props}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>💖 感谢使用 BlockGate</ModalHeader>
+        <ModalHeader>感谢使用 BlockGate</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {!showKeyInput ? (

@@ -1,4 +1,4 @@
-import { Center, Icon, Text, VStack } from "@chakra-ui/react";
+﻿import { Center, Icon, Text, VStack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";

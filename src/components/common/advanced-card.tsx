@@ -1,6 +1,5 @@
-import { Box, BoxProps, Card } from "@chakra-ui/react";
+import { Box, BoxProps } from "@chakra-ui/react";
 import React, { forwardRef } from "react";
-import { useLauncherConfig } from "@/contexts/config";
 import { useThemedCSSStyle } from "@/hooks/themed-css";
 
 interface AdvancedCardProps extends Omit<BoxProps, "children"> {
@@ -10,30 +9,10 @@ interface AdvancedCardProps extends Omit<BoxProps, "children"> {
 }
 
 const AdvancedCard = forwardRef<HTMLDivElement, AdvancedCardProps>(
-  ({ variant = "", level = "back", children, ...props }, ref) => {
-    const { config } = useLauncherConfig();
+  ({ variant = "liquid-glass", level = "back", children, ...props }, ref) => {
     const themedStyles = useThemedCSSStyle();
 
-    const _variant =
-      variant ||
-      (config.appearance.theme.useLiquidGlassDesign
-        ? "liquid-glass"
-        : "elevated");
-
-    if (["elevated", "outline", "filled", "unstyled"].includes(_variant)) {
-      return (
-        <Card
-          ref={ref}
-          variant={_variant}
-          {...props}
-          className={`${themedStyles.card[`card-${level}`]} ${props.className || ""}`}
-        >
-          {children}
-        </Card>
-      );
-    }
-
-    if (_variant == "liquid-glass") {
+    if (variant === "liquid-glass") {
       return (
         <Box
           ref={ref}
@@ -50,13 +29,13 @@ const AdvancedCard = forwardRef<HTMLDivElement, AdvancedCardProps>(
     }
 
     return (
-      <Card
+      <Box
         ref={ref}
         {...props}
         className={`${themedStyles.card[`card-${level}`]} ${props.className || ""}`}
       >
         {children}
-      </Card>
+      </Box>
     );
   }
 );

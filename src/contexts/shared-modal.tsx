@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { useLauncherConfig } from "@/contexts/config";
 
 interface SharedModalContextType {
@@ -20,44 +26,48 @@ export const SharedModalContextProvider: React.FC<{
   >({});
   const { config } = useLauncherConfig();
 
-  const openSharedModal = (key: string, params: any = {}) => {
+  const openSharedModal = useCallback((key: string, params: any = {}) => {
     setModalStates((prev) => ({
       ...prev,
       [key]: { isOpen: true, ...params },
     }));
-    logger.info("Opened shared modal:", key, params);
-  };
+  }, []);
 
-  const closeSharedModal = (key: string) => {
+  const closeSharedModal = useCallback((key: string) => {
     setModalStates((prev) => {
       const { [key]: _, ...newStates } = prev;
       return newStates;
     });
-  };
+  }, []);
 
-  const openGenericConfirmDialog = (params?: any) => {
-    // If the user has previously selected "Don't show again", skip the dialog and call the OK callback directly
-    if (
-      params.suppressKey &&
-      config.suppressedDialogs?.includes(params.suppressKey)
-    ) {
-      params?.onOKCallback?.();
-      return;
-    }
-    openSharedModal("generic-confirm", {
-      ...params,
-    });
-  };
+  const openGenericConfirmDialog = useCallback(
+    (params?: any) => {
+      if (
+        params?.suppressKey &&
+        config.suppressedDialogs?.includes(params.suppressKey)
+      ) {
+        params?.onOKCallback?.();
+        return;
+      }
+      openSharedModal("generic-confirm", {
+        ...params,
+      });
+    },
+    [config.suppressedDialogs, openSharedModal]
+  );
+
+  const providerValue = useMemo(
+    () => ({
+      openSharedModal,
+      closeSharedModal,
+      openGenericConfirmDialog,
+      modalStates,
+    }),
+    [openSharedModal, closeSharedModal, openGenericConfirmDialog, modalStates]
+  );
 
   return (
-    <SharedModalContext.Provider
-      value={{
-        openSharedModal,
-        closeSharedModal,
-        openGenericConfirmDialog,
-        modalStates,
-      }}
-    >
+    <SharedModalContext.Provider value={providerValue}>
       {children}
     </SharedModalContext.Provider>
   );

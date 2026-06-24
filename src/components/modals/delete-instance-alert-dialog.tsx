@@ -1,4 +1,4 @@
-import { AlertDialogProps, Text, VStack } from "@chakra-ui/react";
+﻿import { AlertDialogProps, Text, VStack } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import GenericConfirmDialog from "@/components/modals/generic-confirm-dialog";

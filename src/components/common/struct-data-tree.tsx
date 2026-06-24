@@ -1,4 +1,4 @@
-import { Text, TextProps, VStack } from "@chakra-ui/react";
+﻿import { Text, TextProps, VStack } from "@chakra-ui/react";
 import React from "react";
 
 interface StructDataTreeProps {

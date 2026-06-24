@@ -1,11 +1,13 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
 import { invoke } from "@tauri-apps/api/core";
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export interface UserProfile {
   user_id: string;
@@ -73,12 +75,25 @@ export function MultiplayerProvider({ children }: MultiplayerProviderProps) {
   const isHost =
     currentRoom !== null && currentRoom.host_user_id === currentUser?.user_id;
 
-  useEffect(() => {
-    // 检查是否已有登录用户
-    checkCurrentUser();
+  const refreshRoomList = useCallback(async () => {
+    try {
+      const rooms = await invoke<GameRoom[]>("get_active_rooms");
+      setActiveRooms(rooms);
+    } catch (error) {
+      console.error("Failed to refresh room list:", error);
+    }
   }, []);
 
-  const checkCurrentUser = async () => {
+  const refreshOnlineUsers = useCallback(async () => {
+    try {
+      const users = await invoke<UserProfile[]>("get_online_users");
+      setOnlineUsers(users);
+    } catch (error) {
+      console.error("Failed to refresh online users:", error);
+    }
+  }, []);
+
+  const checkCurrentUser = useCallback(async () => {
     try {
       const user = await invoke<UserProfile | null>("get_current_user");
       if (user) {
@@ -89,23 +104,30 @@ export function MultiplayerProvider({ children }: MultiplayerProviderProps) {
     } catch (error) {
       console.error("Failed to check current user:", error);
     }
-  };
+  }, [refreshRoomList, refreshOnlineUsers]);
 
-  const login = async (username: string) => {
-    try {
-      const user = await invoke<UserProfile>("login_to_multiplayer", {
-        username,
-      });
-      setCurrentUser(user);
-      await refreshRoomList();
-      await refreshOnlineUsers();
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
-    }
-  };
+  useEffect(() => {
+    checkCurrentUser();
+  }, [checkCurrentUser]);
 
-  const logout = async () => {
+  const login = useCallback(
+    async (username: string) => {
+      try {
+        const user = await invoke<UserProfile>("login_to_multiplayer", {
+          username,
+        });
+        setCurrentUser(user);
+        await refreshRoomList();
+        await refreshOnlineUsers();
+      } catch (error) {
+        console.error("Login failed:", error);
+        throw error;
+      }
+    },
+    [refreshRoomList, refreshOnlineUsers]
+  );
+
+  const logout = useCallback(async () => {
     try {
       await invoke("logout_from_multiplayer");
       setCurrentUser(null);
@@ -116,56 +138,53 @@ export function MultiplayerProvider({ children }: MultiplayerProviderProps) {
       console.error("Logout failed:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const refreshRoomList = async () => {
-    try {
-      const rooms = await invoke<GameRoom[]>("get_active_rooms");
-      setActiveRooms(rooms);
-    } catch (error) {
-      console.error("Failed to refresh room list:", error);
-    }
-  };
+  const createRoom = useCallback(
+    async (
+      roomName: string,
+      gamePort: number,
+      networkId?: string
+    ): Promise<GameRoom> => {
+      try {
+        const room = await invoke<GameRoom>("create_game_room", {
+          roomName,
+          gamePort,
+          networkId,
+        });
 
-  const createRoom = async (
-    roomName: string,
-    gamePort: number,
-    networkId?: string
-  ): Promise<GameRoom> => {
-    try {
-      const room = await invoke<GameRoom>("create_game_room", {
-        roomName,
-        gamePort,
-        networkId,
-      });
+        if (networkId) {
+          (room as any).network_id = networkId;
+        }
 
-      if (networkId) {
-        (room as any).network_id = networkId;
+        setCurrentRoom(room);
+        await refreshRoomList();
+        await refreshOnlineUsers();
+        return room;
+      } catch (error) {
+        console.error("Failed to create room:", error);
+        throw error;
       }
+    },
+    [refreshRoomList, refreshOnlineUsers]
+  );
 
-      setCurrentRoom(room);
-      await refreshRoomList();
-      await refreshOnlineUsers();
-      return room;
-    } catch (error) {
-      console.error("Failed to create room:", error);
-      throw error;
-    }
-  };
+  const joinRoom = useCallback(
+    async (roomId: string) => {
+      try {
+        const room = await invoke<GameRoom>("join_game_room", { roomId });
+        setCurrentRoom(room);
+        await refreshRoomList();
+        await refreshOnlineUsers();
+      } catch (error) {
+        console.error("Failed to join room:", error);
+        throw error;
+      }
+    },
+    [refreshRoomList, refreshOnlineUsers]
+  );
 
-  const joinRoom = async (roomId: string) => {
-    try {
-      const room = await invoke<GameRoom>("join_game_room", { roomId });
-      setCurrentRoom(room);
-      await refreshRoomList();
-      await refreshOnlineUsers();
-    } catch (error) {
-      console.error("Failed to join room:", error);
-      throw error;
-    }
-  };
-
-  const leaveRoom = async () => {
+  const leaveRoom = useCallback(async () => {
     if (!currentRoom) return;
 
     try {
@@ -177,68 +196,84 @@ export function MultiplayerProvider({ children }: MultiplayerProviderProps) {
       console.error("Failed to leave room:", error);
       throw error;
     }
-  };
+  }, [currentRoom, refreshRoomList, refreshOnlineUsers]);
 
-  const updateRoomInfo = async (worldName?: string, gameMode?: string) => {
-    if (!currentRoom) return;
+  const updateRoomInfo = useCallback(
+    async (worldName?: string, gameMode?: string) => {
+      if (!currentRoom) return;
 
-    try {
-      await invoke("update_room_info", {
-        roomId: currentRoom.room_id,
-        worldName,
-        gameMode,
-      });
-      await refreshRoomList();
-    } catch (error) {
-      console.error("Failed to update room info:", error);
-      throw error;
-    }
-  };
+      try {
+        await invoke("update_room_info", {
+          roomId: currentRoom.room_id,
+          worldName,
+          gameMode,
+        });
+        await refreshRoomList();
+      } catch (error) {
+        console.error("Failed to update room info:", error);
+        throw error;
+      }
+    },
+    [currentRoom, refreshRoomList]
+  );
 
-  const lockRoom = async (isLocked: boolean) => {
-    if (!currentRoom) return;
+  const lockRoom = useCallback(
+    async (isLocked: boolean) => {
+      if (!currentRoom) return;
 
-    try {
-      await invoke("lock_room", {
-        roomId: currentRoom.room_id,
-        isLocked,
-      });
-      await refreshRoomList();
-    } catch (error) {
-      console.error("Failed to lock room:", error);
-      throw error;
-    }
-  };
+      try {
+        await invoke("lock_room", {
+          roomId: currentRoom.room_id,
+          isLocked,
+        });
+        await refreshRoomList();
+      } catch (error) {
+        console.error("Failed to lock room:", error);
+        throw error;
+      }
+    },
+    [currentRoom, refreshRoomList]
+  );
 
-  const refreshOnlineUsers = async () => {
-    try {
-      const users = await invoke<UserProfile[]>("get_online_users");
-      setOnlineUsers(users);
-    } catch (error) {
-      console.error("Failed to refresh online users:", error);
-    }
-  };
+  const providerValue = useMemo(
+    () => ({
+      currentUser,
+      onlineUsers,
+      activeRooms,
+      isLoggedIn,
+      currentRoom,
+      isHost,
+      login,
+      logout,
+      refreshRoomList,
+      createRoom,
+      joinRoom,
+      leaveRoom,
+      updateRoomInfo,
+      lockRoom,
+      refreshOnlineUsers,
+    }),
+    [
+      currentUser,
+      onlineUsers,
+      activeRooms,
+      isLoggedIn,
+      currentRoom,
+      isHost,
+      login,
+      logout,
+      refreshRoomList,
+      createRoom,
+      joinRoom,
+      leaveRoom,
+      updateRoomInfo,
+      lockRoom,
+      refreshOnlineUsers,
+    ]
+  );
 
   return (
-    <MultiplayerContext.Provider
-      value={{
-        currentUser,
-        onlineUsers,
-        activeRooms,
-        isLoggedIn,
-        currentRoom,
-        isHost,
-        login,
-        logout,
-        refreshRoomList,
-        createRoom,
-        joinRoom,
-        leaveRoom,
-        updateRoomInfo,
-        lockRoom,
-        refreshOnlineUsers,
-      }}
-    >
+    <MultiplayerContext.Provider value={providerValue}>
       {children}
     </MultiplayerContext.Provider>
   );

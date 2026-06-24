@@ -1,27 +1,30 @@
 import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
+  Badge,
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
+  Center,
   Divider,
+  Flex,
   HStack,
-  Heading,
   IconButton,
   Input,
   Text,
   VStack,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { LuCopy, LuLogOut, LuUserPlus, LuPlus } from "react-icons/lu";
-import { Section } from "@/components/common/section";
+import {
+  LuArrowLeft,
+  LuCheck,
+  LuCopy,
+  LuCpu,
+  LuGlobe,
+  LuLogOut,
+  LuNetwork,
+  LuPlus,
+  LuUser,
+  LuUsers,
+} from "react-icons/lu";
 import { useMultiplayer } from "@/contexts/multiplayer";
 import { useRoom } from "@/contexts/room";
 import { useToast } from "@/contexts/toast";
@@ -29,23 +32,15 @@ import { useToast } from "@/contexts/toast";
 type UserRole = "unselected" | "host" | "guest";
 
 const MultiplayerLobby = () => {
-  const { t } = useTranslation();
   const toast = useToast();
-
-  const {
-    currentUser,
-    login,
-    logout,
-  } = useMultiplayer();
-
+  const { currentUser, login, logout } = useMultiplayer();
   const { roomState, setRoomState, clearRoomState } = useRoom();
 
   const [usernameInput, setUsernameInput] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isCheckingInstalling, setIsCheckingInstalling] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+
   const [userRole, setUserRole] = useState<UserRole>("unselected");
   const [roomNameInput, setRoomNameInput] = useState("");
   const [gamePortInput, setGamePortInput] = useState("25565");
@@ -53,8 +48,7 @@ const MultiplayerLobby = () => {
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [isJoiningRoom, setIsJoiningRoom] = useState(false);
   const [actualPort, setActualPort] = useState<string>("25565");
-
-  const boxBg = useColorModeValue("blue.50", "blue.900");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     checkInstallation();
@@ -68,15 +62,12 @@ const MultiplayerLobby = () => {
       if (typeof result === "object" && result !== null) {
         const resultObj = result as any;
         setIsInstalled(resultObj.is_installed === true);
-        setErrorMessage(resultObj.error_message || null);
       } else {
         setIsInstalled(false);
-        setErrorMessage(null);
       }
     } catch (e) {
       console.error("Failed to check installation:", e);
       setIsInstalled(false);
-      setErrorMessage(String(e));
     } finally {
       setIsCheckingInstalling(false);
     }
@@ -86,19 +77,16 @@ const MultiplayerLobby = () => {
     if (isLoggingIn || usernameInput.trim() === "") return;
 
     setIsLoggingIn(true);
-
     try {
       await login(usernameInput.trim());
       toast({
         title: "登录成功！",
-        description: `欢迎, ${usernameInput.trim()}!`,
         status: "success",
       });
     } catch (e) {
       console.error("Failed to login:", e);
       toast({
         title: "登录失败",
-        description: String(e),
         status: "error",
       });
     } finally {
@@ -107,9 +95,6 @@ const MultiplayerLobby = () => {
   };
 
   const handleLogout = async () => {
-    if (roomState.isConnected) {
-      await handleLeaveRoom();
-    }
     await logout();
     clearRoomState();
     setUserRole("unselected");
@@ -118,7 +103,12 @@ const MultiplayerLobby = () => {
   };
 
   const handleCreateRoom = async () => {
-    if (isCreatingRoom || roomNameInput.trim() === "" || gamePortInput.trim() === "") return;
+    if (
+      isCreatingRoom ||
+      roomNameInput.trim() === "" ||
+      gamePortInput.trim() === ""
+    )
+      return;
 
     if (!isInstalled) {
       toast({
@@ -129,21 +119,14 @@ const MultiplayerLobby = () => {
     }
 
     setIsCreatingRoom(true);
-
     try {
       const networkId = (await invoke("create_network")) as string;
-
-      const port = parseInt(gamePortInput.trim()) || 25565;
-
-      // 获取连接信息
-      const connectionInfo = (await invoke("get_network_status")) as any;
 
       setRoomState({
         ...roomState,
         roomCode: networkId,
-        gamePort: port,
+        gamePort: parseInt(gamePortInput.trim()) || 25565,
         networkId: networkId,
-        hostIp: connectionInfo?.virtual_ip,
         isHost: true,
         isConnected: true,
       });
@@ -157,7 +140,6 @@ const MultiplayerLobby = () => {
       console.error("Failed to create room:", e);
       toast({
         title: "创建房间失败",
-        description: String(e),
         status: "error",
       });
     } finally {
@@ -177,20 +159,17 @@ const MultiplayerLobby = () => {
     }
 
     setIsJoiningRoom(true);
-
     try {
       const networkId = roomCodeInput.trim();
-
-      const connectionInfo = (await invoke("join_network", {
+      await invoke("join_network", {
         networkId: networkId,
-      })) as any;
+      });
 
       setRoomState({
         ...roomState,
         roomCode: networkId,
         gamePort: 25565,
         networkId: networkId,
-        hostIp: connectionInfo?.virtual_ip,
         isHost: false,
         isConnected: true,
       });
@@ -203,7 +182,6 @@ const MultiplayerLobby = () => {
       console.error("Failed to join room:", e);
       toast({
         title: "加入房间失败",
-        description: String(e),
         status: "error",
       });
     } finally {
@@ -228,393 +206,988 @@ const MultiplayerLobby = () => {
       });
     } catch (e) {
       console.error("Failed to leave room:", e);
-      toast({
-        title: "离开房间失败",
-        description: String(e),
-        status: "error",
-      });
     }
   };
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, field: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      setCopiedField(field);
       toast({
         title: "已复制！",
         status: "success",
       });
+      setTimeout(() => setCopiedField(null), 2000);
     } catch (e) {
       toast({
         title: "复制失败",
-        description: String(e),
         status: "error",
       });
     }
   };
 
+  // 页面标题组件
+  const PageHeader = ({
+    title,
+    subtitle,
+    onBack,
+  }: {
+    title: string;
+    subtitle?: string;
+    onBack?: () => void;
+  }) => (
+    <VStack
+      spacing={3}
+      align="flex-start"
+      w="100%"
+      mb={8}
+      style={{
+        animation: "fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both",
+      }}
+    >
+      {onBack && (
+        <IconButton
+          aria-label="返回"
+          icon={<LuArrowLeft size={18} />}
+          bg="rgba(255, 255, 255, 0.65)"
+          color="gray.700"
+          border="1px solid rgba(255, 255, 255, 0.75)"
+          borderRadius="xl"
+          size="sm"
+          backdropFilter="blur(40px) saturate(200%)"
+          boxShadow="0 6px 20px rgba(0, 0, 0, 0.06)"
+          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+          _hover={{
+            bg: "rgba(255, 255, 255, 0.9)",
+            color: "gray.900",
+            transform: "translateY(-2px)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
+          }}
+          _active={{
+            transform: "translateY(0)",
+            bg: "rgba(255, 255, 255, 0.95)",
+          }}
+          onClick={onBack}
+        />
+      )}
+      <Text
+        fontSize="32px"
+        fontWeight="800"
+        color="gray.900"
+        letterSpacing="-0.02em"
+        lineHeight="1.2"
+      >
+        {title}
+      </Text>
+      {subtitle && (
+        <Text fontSize="15px" color="gray.500" lineHeight="1.5">
+          {subtitle}
+        </Text>
+      )}
+    </VStack>
+  );
+
+  // 环境警告组件
+  const EnvironmentWarning = () => (
+    <Flex
+      bg="rgba(255, 149, 0, 0.08)"
+      border="1px solid rgba(255, 149, 0, 0.25)"
+      borderRadius="2xl"
+      p={5}
+      align="flex-start"
+      mb={6}
+      transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+    >
+      <Box
+        w="40px"
+        h="40px"
+        bg="rgba(255, 149, 0, 0.15)"
+        borderRadius="xl"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        flexShrink={0}
+        mr={3.5}
+      >
+        <LuCpu size={20} color="#FF9500" />
+      </Box>
+      <VStack spacing={0.5} align="flex-start">
+        <Text fontSize="14px" color="rgb(140, 80, 0)" fontWeight="600">
+          联机环境未配置
+        </Text>
+        <Text fontSize="12.5px" color="rgba(140, 80, 0, 0.75)" lineHeight="1.5">
+          请在启动器同目录下配置 Terracotta 联机工具
+        </Text>
+      </VStack>
+    </Flex>
+  );
+
+  // 登录界面
   if (!currentUser) {
     return (
-      <Section title="联机大厅" description="登录后即可与好友一起玩！">
-        <VStack align="stretch" spacing={4}>
-          <Alert status="info">
-            <AlertIcon />
-            <Box>
-              <AlertTitle>联机功能</AlertTitle>
-              <AlertDescription>
-                使用虚拟网络轻松联机玩 Minecraft！
-              </AlertDescription>
-            </Box>
-          </Alert>
+      <Box>
+        <PageHeader
+          title="联机大厅"
+          subtitle="登录后即可与好友一起畅玩 Minecraft"
+        />
 
-          {!isCheckingInstalling && !isInstalled && (
-            <Alert status="warning">
-              <AlertIcon />
-              <Box flex="1">
-                <AlertTitle>联机环境未配置</AlertTitle>
-                <AlertDescription>
-                  请在启动器同目录下创建 terracotta 文件夹，并将
-                  Terracotta 程序放入其中
-                </AlertDescription>
-                {errorMessage && (
-                  <Text fontSize="sm" mt={2} color="gray.600">
-                    {errorMessage}
-                  </Text>
-                )}
+        {!isCheckingInstalling && !isInstalled && <EnvironmentWarning />}
+
+        <Center>
+          <Box
+            w="100%"
+            maxW="440px"
+            bg="rgba(255, 255, 255, 0.65)"
+            border="1px solid rgba(255, 255, 255, 0.75)"
+            borderRadius="2xl"
+            backdropFilter="blur(40px) saturate(200%)"
+            boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+            p={8}
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            style={{
+              animation:
+                "fadeInScale 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both",
+            }}
+          >
+            <VStack spacing={6} align="center">
+              {/* 图标 */}
+              <Box
+                w="56px"
+                h="56px"
+                bg="rgba(10, 132, 255, 0.95)"
+                borderRadius="xl"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow="0 6px 24px rgba(10, 132, 255, 0.35)"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+              >
+                <LuUsers size={28} color="white" />
               </Box>
-            </Alert>
-          )}
 
-          <VStack align="stretch" spacing={3}>
-            <Input
-              placeholder="输入用户名"
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            />
-            <Button
-              colorScheme="blue"
-              onClick={handleLogin}
-              isLoading={isLoggingIn}
-            >
-              登录
-            </Button>
-          </VStack>
-        </VStack>
-      </Section>
+              <VStack spacing={1} align="center">
+                <Text fontSize="20px" fontWeight="700" color="gray.900">
+                  欢迎回来
+                </Text>
+                <Text fontSize="13px" color="gray.500">
+                  输入你的用户名以继续
+                </Text>
+              </VStack>
+
+              <VStack w="100%" spacing={4}>
+                <Box w="100%">
+                  <Text
+                    fontSize="13px"
+                    color="gray.600"
+                    mb={2}
+                    fontWeight="500"
+                  >
+                    用户名
+                  </Text>
+                  <Input
+                    placeholder="请输入用户名"
+                    value={usernameInput}
+                    onChange={(e) => setUsernameInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    h="52px"
+                    fontSize="15px"
+                    borderRadius="xl"
+                    bg="rgba(245, 245, 247, 0.8)"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                    color="gray.900"
+                    _placeholder={{ color: "gray.400" }}
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _focus={{
+                      borderColor: "primary.500",
+                      bg: "rgba(255, 255, 255, 0.95)",
+                      boxShadow: "0 0 0 4px rgba(10, 132, 255, 0.18)",
+                    }}
+                  />
+                </Box>
+                <Button
+                  w="100%"
+                  size="lg"
+                  h="56px"
+                  fontSize="15px"
+                  fontWeight="600"
+                  bg="rgba(10, 132, 255, 0.95)"
+                  color="white"
+                  border="1px solid rgba(255, 255, 255, 0.35)"
+                  borderRadius="xl"
+                  boxShadow="0 4px 16px rgba(10, 132, 255, 0.28)"
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  _hover={{
+                    bg: "rgba(10, 132, 255, 1)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 24px rgba(10, 132, 255, 0.38)",
+                  }}
+                  _active={{
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 8px rgba(10, 132, 255, 0.2)",
+                  }}
+                  onClick={handleLogin}
+                  isLoading={isLoggingIn}
+                  isDisabled={!isInstalled}
+                >
+                  <HStack spacing={2}>
+                    <LuGlobe size={18} />
+                    <Text>进入联机大厅</Text>
+                  </HStack>
+                </Button>
+              </VStack>
+            </VStack>
+          </Box>
+        </Center>
+      </Box>
     );
   }
 
+  // 房间连接成功界面
   if (roomState.isConnected) {
-    const serverAddress = roomState.hostIp 
-      ? `${roomState.hostIp}:${actualPort}` 
+    const serverAddress = roomState.hostIp
+      ? `${roomState.hostIp}:${actualPort}`
       : null;
 
     return (
-      <Section title="联机房间" description={`欢迎, ${currentUser.username}!`}>
-        <VStack align="stretch" spacing={4}>
-          <Alert status="success">
-            <AlertIcon />
-            <Box>
-              <AlertTitle>{roomState.isHost ? "房主模式" : "玩家模式"}</AlertTitle>
-              <AlertDescription>
-                {roomState.isHost 
-                  ? "你的房间已开启，分享房间码让朋友加入！"
-                  : "你已成功加入房间，快去连接服务器吧！"}
-              </AlertDescription>
-            </Box>
-          </Alert>
+      <Box>
+        <PageHeader
+          title={roomState.isHost ? "房间已创建" : "已加入房间"}
+          subtitle={
+            roomState.isHost ? "分享房间码给朋友加入" : "使用以下地址连接到游戏"
+          }
+        />
 
-          <Card bg={boxBg} p={4}>
-            <CardHeader pb={2}>
-              <Heading size="md">访问信息</Heading>
-            </CardHeader>
-            <CardBody>
-              <VStack align="stretch" spacing={3}>
-                {roomState.isHost && roomState.roomCode && (
-                  <>
-                    <Text fontWeight="bold">房间码</Text>
+        <Center>
+          <VStack spacing={6} align="stretch" maxW="520px" w="100%">
+            {/* 状态卡片 */}
+            <Flex
+              bg="rgba(255, 255, 255, 0.65)"
+              border="1px solid rgba(255, 255, 255, 0.75)"
+              borderRadius="2xl"
+              backdropFilter="blur(40px) saturate(200%)"
+              boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+              p={6}
+              align="center"
+              justify="space-between"
+              transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+              <HStack spacing={4}>
+                <Box
+                  w="48px"
+                  h="48px"
+                  bg="rgba(48, 209, 88, 0.15)"
+                  borderRadius="xl"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                >
+                  <LuCheck size={24} color="rgb(36, 138, 61)" />
+                </Box>
+                <VStack spacing={0} align="flex-start">
+                  <Text fontSize="16px" fontWeight="700" color="gray.900">
+                    {roomState.isHost ? "房主在线" : "连接成功"}
+                  </Text>
+                  <Text fontSize="13px" color="gray.500">
+                    {currentUser?.username}
+                  </Text>
+                </VStack>
+              </HStack>
+              <Badge
+                bg="rgba(10, 132, 255, 0.12)"
+                color="primary.600"
+                px={3}
+                py={1.5}
+                fontSize="12px"
+                fontWeight="600"
+                borderRadius="full"
+                border="1px solid rgba(10, 132, 255, 0.18)"
+              >
+                {roomState.isHost ? "HOST" : "GUEST"}
+              </Badge>
+            </Flex>
+
+            {/* 房间码（仅房主） */}
+            {roomState.isHost && roomState.roomCode && (
+              <Box
+                bg="rgba(255, 255, 255, 0.65)"
+                border="1px solid rgba(255, 255, 255, 0.75)"
+                borderRadius="2xl"
+                backdropFilter="blur(40px) saturate(200%)"
+                boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+                p={6}
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+              >
+                <VStack spacing={4} align="stretch">
+                  <VStack spacing={1} align="flex-start">
                     <HStack>
-                      <Text fontFamily="mono" fontSize="lg" flex="1">
-                        {roomState.roomCode}
+                      <LuNetwork size={16} color="#0A84FF" />
+                      <Text fontSize="13px" color="gray.600" fontWeight="600">
+                        房间码
                       </Text>
-                      <IconButton
-                        icon={<LuCopy />}
-                        aria-label="复制房间码"
-                        size="sm"
-                        onClick={() => copyToClipboard(roomState.roomCode || "")}
-                      />
                     </HStack>
-                    <Divider />
-                  </>
-                )}
+                    <Text fontSize="12.5px" color="gray.500">
+                      分享给朋友以加入你的房间
+                    </Text>
+                  </VStack>
 
-                <Text fontWeight="bold">本机虚拟 IP</Text>
-                <Text fontFamily="mono" fontSize="lg">
-                  {roomState.hostIp || "获取中..."}
-                </Text>
-                <Divider />
+                  <Flex
+                    bg="rgba(10, 132, 255, 0.06)"
+                    border="1px solid rgba(10, 132, 255, 0.25)"
+                    borderRadius="xl"
+                    p={4}
+                    align="center"
+                    justify="space-between"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _hover={{
+                      bg: "rgba(10, 132, 255, 0.1)",
+                    }}
+                  >
+                    <Text
+                      fontFamily="monospace"
+                      fontSize="18px"
+                      fontWeight="700"
+                      color="primary.700"
+                      letterSpacing="2px"
+                    >
+                      {roomState.roomCode}
+                    </Text>
+                    <IconButton
+                      aria-label="复制房间码"
+                      icon={
+                        copiedField === "roomCode" ? (
+                          <LuCheck size={18} />
+                        ) : (
+                          <LuCopy size={18} />
+                        )
+                      }
+                      bg={
+                        copiedField === "roomCode"
+                          ? "rgba(48, 209, 88, 0.15)"
+                          : "rgba(255, 255, 255, 0.5)"
+                      }
+                      color={
+                        copiedField === "roomCode"
+                          ? "rgb(36, 138, 61)"
+                          : "gray.700"
+                      }
+                      border="1px solid rgba(255, 255, 255, 0.75)"
+                      borderRadius="xl"
+                      size="md"
+                      backdropFilter="blur(20px) saturate(180%)"
+                      transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                      _hover={{
+                        bg:
+                          copiedField === "roomCode"
+                            ? "rgba(48, 209, 88, 0.22)"
+                            : "rgba(10, 132, 255, 0.1)",
+                        color:
+                          copiedField === "roomCode"
+                            ? "rgb(36, 138, 61)"
+                            : "primary.600",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 12px rgba(10, 132, 255, 0.18)",
+                      }}
+                      _active={{
+                        transform: "translateY(0)",
+                      }}
+                      onClick={() =>
+                        copyToClipboard(roomState.roomCode || "", "roomCode")
+                      }
+                    />
+                  </Flex>
+                </VStack>
+              </Box>
+            )}
 
-                {roomState.isHost && (
-                  <>
-                    <Box>
-                      <Text fontWeight="bold" mb={2}>
-                        Minecraft 实际端口
-                      </Text>
-                      <Text fontSize="sm" color="gray.500" mb={2}>
-                        请在 Minecraft 中开启「对局域网开放」后，把显示的端口号填入下方：
-                      </Text>
-                      <HStack>
-                        <Input
-                          placeholder="例如：51940"
-                          type="number"
-                          value={actualPort}
-                          onChange={(e) => setActualPort(e.target.value)}
-                        />
-                      </HStack>
-                    </Box>
-                    <Divider />
-                  </>
-                )}
+            {/* 本机虚拟 IP */}
+            <Box
+              bg="rgba(255, 255, 255, 0.65)"
+              border="1px solid rgba(255, 255, 255, 0.75)"
+              borderRadius="2xl"
+              backdropFilter="blur(40px) saturate(200%)"
+              boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+              p={6}
+              transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+              <VStack spacing={4} align="stretch">
+                <VStack spacing={1} align="flex-start">
+                  <Text fontSize="13px" color="gray.600" fontWeight="600">
+                    本机虚拟 IP
+                  </Text>
+                </VStack>
+                <Box
+                  bg="rgba(245, 245, 247, 0.9)"
+                  border="1px solid rgba(0, 0, 0, 0.06)"
+                  borderRadius="xl"
+                  p={4}
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                >
+                  <Text
+                    fontFamily="monospace"
+                    fontSize="17px"
+                    fontWeight="700"
+                    color="gray.800"
+                  >
+                    {roomState.hostIp || "获取中..."}
+                  </Text>
+                </Box>
+              </VStack>
+            </Box>
 
-                <Text fontWeight="bold">{roomState.isHost ? "朋友连接地址" : "服务器地址"}</Text>
+            {/* 端口设置（仅房主） */}
+            {roomState.isHost && (
+              <Box
+                bg="rgba(255, 255, 255, 0.65)"
+                border="1px solid rgba(255, 255, 255, 0.75)"
+                borderRadius="2xl"
+                backdropFilter="blur(40px) saturate(200%)"
+                boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+                p={6}
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+              >
+                <VStack spacing={4} align="stretch">
+                  <VStack spacing={1} align="flex-start">
+                    <Text fontSize="13px" color="gray.600" fontWeight="600">
+                      Minecraft 端口
+                    </Text>
+                    <Text fontSize="12.5px" color="gray.500">
+                      在游戏中开启「对局域网开放」后填入显示的端口
+                    </Text>
+                  </VStack>
+                  <Input
+                    type="number"
+                    value={actualPort}
+                    onChange={(e) => setActualPort(e.target.value)}
+                    placeholder="输入游戏端口"
+                    h="52px"
+                    fontSize="15px"
+                    borderRadius="xl"
+                    fontFamily="monospace"
+                    bg="rgba(245, 245, 247, 0.8)"
+                    borderColor="rgba(0, 0, 0, 0.08)"
+                    color="gray.900"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _focus={{
+                      borderColor: "primary.500",
+                      bg: "rgba(255, 255, 255, 0.95)",
+                      boxShadow: "0 0 0 4px rgba(10, 132, 255, 0.18)",
+                    }}
+                  />
+                </VStack>
+              </Box>
+            )}
+
+            {/* 服务器地址 */}
+            <Box
+              bg="rgba(255, 255, 255, 0.65)"
+              border="1px solid rgba(255, 255, 255, 0.75)"
+              borderRadius="2xl"
+              backdropFilter="blur(40px) saturate(200%)"
+              boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+              p={6}
+              transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+              <VStack spacing={4} align="stretch">
+                <VStack spacing={1} align="flex-start">
+                  <Text fontSize="13px" color="gray.600" fontWeight="600">
+                    {roomState.isHost ? "朋友连接地址" : "服务器地址"}
+                  </Text>
+                </VStack>
+
                 {serverAddress ? (
-                  <HStack>
-                    <Text fontFamily="mono" fontSize="lg" flex="1">
+                  <Flex
+                    bg="rgba(245, 245, 247, 0.9)"
+                    border="1px solid rgba(0, 0, 0, 0.06)"
+                    borderRadius="xl"
+                    p={4}
+                    align="center"
+                    justify="space-between"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  >
+                    <Text
+                      fontFamily="monospace"
+                      fontSize="17px"
+                      fontWeight="700"
+                      color="gray.800"
+                    >
                       {serverAddress}
                     </Text>
                     <IconButton
-                      icon={<LuCopy />}
-                      aria-label="复制服务器地址"
-                      size="sm"
-                      onClick={() => copyToClipboard(serverAddress)}
+                      aria-label="复制地址"
+                      icon={
+                        copiedField === "address" ? (
+                          <LuCheck size={18} />
+                        ) : (
+                          <LuCopy size={18} />
+                        )
+                      }
+                      bg={
+                        copiedField === "address"
+                          ? "rgba(48, 209, 88, 0.15)"
+                          : "rgba(255, 255, 255, 0.5)"
+                      }
+                      color={
+                        copiedField === "address"
+                          ? "rgb(36, 138, 61)"
+                          : "gray.700"
+                      }
+                      border="1px solid rgba(255, 255, 255, 0.75)"
+                      borderRadius="xl"
+                      size="md"
+                      backdropFilter="blur(20px) saturate(180%)"
+                      transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                      _hover={{
+                        bg:
+                          copiedField === "address"
+                            ? "rgba(48, 209, 88, 0.22)"
+                            : "rgba(10, 132, 255, 0.1)",
+                        color:
+                          copiedField === "address"
+                            ? "rgb(36, 138, 61)"
+                            : "primary.600",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 12px rgba(10, 132, 255, 0.18)",
+                      }}
+                      _active={{
+                        transform: "translateY(0)",
+                      }}
+                      onClick={() => copyToClipboard(serverAddress, "address")}
                     />
-                  </HStack>
+                  </Flex>
                 ) : (
-                  <Text color="gray.500">正在获取服务器地址...</Text>
+                  <Text fontSize="14px" color="gray.500">
+                    正在获取服务器地址...
+                  </Text>
                 )}
-
-                <Divider />
-
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    使用方法
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    {roomState.isHost 
-                      ? "1. 复制房间码分享给朋友\n2. 在 Minecraft 中开启「对局域网开放」\n3. 把 Minecraft 显示的端口号填入上方\n4. 朋友输入房间码加入你的房间"
-                      : "1. 复制上方服务器地址\n2. 打开 Minecraft\n3. 添加服务器，粘贴地址即可连接"}
-                  </Text>
-                </Box>
-
-                <Divider />
-
-                <Box>
-                  <Text fontWeight="bold" mb={2}>
-                    故障排查
-                  </Text>
-                  <Text fontSize="sm" color="gray.500">
-                    如果无法连接，请确认：
-                    <br />• 双方都以管理员权限运行启动器
-                    <br />• Windows 防火墙没有阻止
-                    <br />• 双方的 Terracotta 都显示已连接
-                  </Text>
-                </Box>
               </VStack>
-            </CardBody>
-          </Card>
+            </Box>
 
-          <HStack justify="flex-end" spacing={3}>
+            {/* 使用说明 */}
+            <Box
+              bg="rgba(245, 245, 247, 0.9)"
+              border="1px solid rgba(0, 0, 0, 0.06)"
+              borderRadius="2xl"
+              p={5}
+              transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            >
+              <Text
+                fontSize="13px"
+                color="gray.700"
+                lineHeight="1.8"
+                whiteSpace="pre-line"
+              >
+                {roomState.isHost
+                  ? "1. 打开 Minecraft 并进入游戏\n2. 按 ESC 键，选择「对局域网开放」\n3. 将游戏显示的端口号填入上方输入框\n4. 分享房间码给朋友加入"
+                  : "1. 复制上方服务器地址\n2. 打开 Minecraft\n3. 进入「多人游戏」\n4. 点击「添加服务器」并粘贴地址\n5. 连接到服务器即可开始游戏"}
+              </Text>
+            </Box>
+
+            <Divider borderColor="rgba(0, 0, 0, 0.08)" />
+
+            {/* 离开按钮 */}
             <Button
-              colorScheme="red"
-              leftIcon={<LuLogOut />}
+              w="100%"
+              size="lg"
+              h="56px"
+              fontSize="15px"
+              fontWeight="600"
+              bg="rgba(255, 59, 48, 0.9)"
+              color="white"
+              border="1px solid rgba(255, 255, 255, 0.35)"
+              borderRadius="xl"
+              boxShadow="0 4px 16px rgba(255, 59, 48, 0.22)"
+              transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+              _hover={{
+                bg: "rgba(255, 59, 48, 1)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 8px 24px rgba(255, 59, 48, 0.35)",
+              }}
+              _active={{
+                transform: "translateY(0)",
+                boxShadow: "0 2px 8px rgba(255, 59, 48, 0.18)",
+              }}
               onClick={handleLeaveRoom}
             >
-              退出房间
-            </Button>
-          </HStack>
-        </VStack>
-      </Section>
-    );
-  }
-
-  if (userRole === "unselected") {
-    return (
-      <Section title="联机大厅" description={`欢迎, ${currentUser.username}!`}>
-        <VStack align="stretch" spacing={4}>
-          <Alert status="info">
-            <AlertIcon />
-            <Box>
-              <AlertTitle>选择你的角色</AlertTitle>
-              <AlertDescription>
-                选择&quot;我要当房主&quot;创建房间，或选择&quot;我要当客人&quot;加入房间
-              </AlertDescription>
-            </Box>
-          </Alert>
-
-          {!isCheckingInstalling && !isInstalled && (
-            <Alert status="warning">
-              <AlertIcon />
-              <Box flex="1">
-                <AlertTitle>联机环境未配置</AlertTitle>
-                <AlertDescription>
-                  请在启动器同目录下创建 terracotta 文件夹，并将
-                  Terracotta 程序放入其中
-                </AlertDescription>
-                {errorMessage && (
-                  <Text fontSize="sm" mt={2} color="gray.600">
-                    {errorMessage}
-                  </Text>
-                )}
-              </Box>
-            </Alert>
-          )}
-
-          <VStack spacing={4} mt={4}>
-            <Button
-              colorScheme="blue"
-              size="lg"
-              height="120px"
-              width="100%"
-              leftIcon={<LuPlus size={32} />}
-              onClick={() => setUserRole("host")}
-              isDisabled={!isInstalled}
-            >
-              <VStack spacing={1}>
-                <Text fontSize="xl" fontWeight="bold">我要当房主</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  创建房间，让朋友加入
-                </Text>
-              </VStack>
-            </Button>
-
-            <Button
-              colorScheme="green"
-              size="lg"
-              height="120px"
-              width="100%"
-              leftIcon={<LuUserPlus size={32} />}
-              onClick={() => setUserRole("guest")}
-              isDisabled={!isInstalled}
-            >
-              <VStack spacing={1}>
-                <Text fontSize="xl" fontWeight="bold">我要当客人</Text>
-                <Text fontSize="sm" fontWeight="normal">
-                  输入房间码，加入房间
-                </Text>
-              </VStack>
+              <HStack spacing={2}>
+                <LuLogOut size={18} />
+                <Text>离开房间</Text>
+              </HStack>
             </Button>
           </VStack>
-
-          <Divider my={4} />
-
-          <Button variant="ghost" onClick={handleLogout}>
-            <LuLogOut style={{ marginRight: "8px" }} />
-            登出
-          </Button>
-        </VStack>
-      </Section>
+        </Center>
+      </Box>
     );
   }
 
+  // 选择角色界面
+  if (userRole === "unselected") {
+    return (
+      <Box>
+        <PageHeader
+          title="联机大厅"
+          subtitle={`当前用户：${currentUser?.username}`}
+        />
+
+        {!isCheckingInstalling && !isInstalled && <EnvironmentWarning />}
+
+        <Center>
+          <VStack spacing={8} maxW="720px" w="100%" align="stretch">
+            {/* 两大选项 */}
+            <HStack spacing={5} w="100%">
+              {/* 创建房间 */}
+              <Box
+                as="button"
+                onClick={() => isInstalled && setUserRole("host")}
+                flex="1"
+                cursor={isInstalled ? "pointer" : "not-allowed"}
+                opacity={isInstalled ? 1 : 0.5}
+                bg="rgba(255, 255, 255, 0.65)"
+                border="1px solid rgba(255, 255, 255, 0.75)"
+                borderRadius="2xl"
+                backdropFilter="blur(40px) saturate(200%)"
+                boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+                p={8}
+                textAlign="left"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{
+                  borderColor: isInstalled
+                    ? "rgba(10, 132, 255, 0.35)"
+                    : "rgba(255, 255, 255, 0.75)",
+                  bg: isInstalled
+                    ? "rgba(10, 132, 255, 0.08)"
+                    : "rgba(255, 255, 255, 0.65)",
+                  transform: isInstalled ? "translateY(-6px)" : "none",
+                  boxShadow: isInstalled
+                    ? "0 20px 56px rgba(10, 132, 255, 0.22)"
+                    : "0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset",
+                }}
+                _active={{
+                  transform: isInstalled ? "translateY(-2px)" : "none",
+                }}
+              >
+                <VStack spacing={5} align="flex-start">
+                  <Box
+                    w="56px"
+                    h="56px"
+                    bg="rgba(10, 132, 255, 0.95)"
+                    borderRadius="xl"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    boxShadow="0 6px 24px rgba(10, 132, 255, 0.35)"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  >
+                    <LuPlus size={28} color="white" strokeWidth="2.5" />
+                  </Box>
+                  <VStack spacing={1} align="flex-start">
+                    <Text fontSize="18px" fontWeight="700" color="gray.900">
+                      创建房间
+                    </Text>
+                    <Text fontSize="13.5px" color="gray.500" lineHeight="1.6">
+                      作为房主，创建一个房间并邀请朋友加入
+                    </Text>
+                  </VStack>
+                </VStack>
+              </Box>
+
+              {/* 加入房间 */}
+              <Box
+                as="button"
+                onClick={() => isInstalled && setUserRole("guest")}
+                flex="1"
+                cursor={isInstalled ? "pointer" : "not-allowed"}
+                opacity={isInstalled ? 1 : 0.5}
+                bg="rgba(255, 255, 255, 0.65)"
+                border="1px solid rgba(255, 255, 255, 0.75)"
+                borderRadius="2xl"
+                backdropFilter="blur(40px) saturate(200%)"
+                boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+                p={8}
+                textAlign="left"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{
+                  borderColor: isInstalled
+                    ? "rgba(48, 209, 88, 0.35)"
+                    : "rgba(255, 255, 255, 0.75)",
+                  bg: isInstalled
+                    ? "rgba(48, 209, 88, 0.08)"
+                    : "rgba(255, 255, 255, 0.65)",
+                  transform: isInstalled ? "translateY(-6px)" : "none",
+                  boxShadow: isInstalled
+                    ? "0 20px 56px rgba(48, 209, 88, 0.22)"
+                    : "0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset",
+                }}
+                _active={{
+                  transform: isInstalled ? "translateY(-2px)" : "none",
+                }}
+              >
+                <VStack spacing={5} align="flex-start">
+                  <Box
+                    w="56px"
+                    h="56px"
+                    bg="rgba(48, 209, 88, 0.95)"
+                    borderRadius="xl"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    boxShadow="0 6px 24px rgba(48, 209, 88, 0.35)"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  >
+                    <LuUser size={28} color="white" strokeWidth="2.5" />
+                  </Box>
+                  <VStack spacing={1} align="flex-start">
+                    <Text fontSize="18px" fontWeight="700" color="gray.900">
+                      加入房间
+                    </Text>
+                    <Text fontSize="13.5px" color="gray.500" lineHeight="1.6">
+                      输入朋友分享的房间码，快速加入游戏
+                    </Text>
+                  </VStack>
+                </VStack>
+              </Box>
+            </HStack>
+
+            {/* 退出登录 */}
+            <Center>
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                color="gray.600"
+                size="md"
+                bg="transparent"
+                border="none"
+                borderRadius="xl"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{
+                  bg: "rgba(0, 0, 0, 0.05)",
+                  color: "gray.900",
+                  transform: "translateY(-2px)",
+                }}
+                _active={{
+                  transform: "translateY(0)",
+                }}
+              >
+                <HStack spacing={2}>
+                  <LuLogOut size={16} />
+                  <Text>退出登录</Text>
+                </HStack>
+              </Button>
+            </Center>
+          </VStack>
+        </Center>
+      </Box>
+    );
+  }
+
+  // 创建房间界面
   if (userRole === "host") {
     return (
-      <Section title="创建房间" description="填写房间信息，创建你的专属房间">
-        <VStack align="stretch" spacing={4}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setUserRole("unselected")}
+      <Box>
+        <PageHeader
+          title="创建房间"
+          subtitle="设置房间信息，然后创建房间邀请朋友加入"
+          onBack={() => setUserRole("unselected")}
+        />
+
+        {!isCheckingInstalling && !isInstalled && <EnvironmentWarning />}
+
+        <Center>
+          <Box
+            w="100%"
+            maxW="520px"
+            bg="rgba(255, 255, 255, 0.65)"
+            border="1px solid rgba(255, 255, 255, 0.75)"
+            borderRadius="2xl"
+            backdropFilter="blur(40px) saturate(200%)"
+            boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+            p={8}
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
           >
-            ← 返回选择
-          </Button>
+            <VStack spacing={6} align="stretch">
+              <Box>
+                <Text fontSize="13px" color="gray.600" mb={2} fontWeight="600">
+                  房间名称
+                </Text>
+                <Input
+                  placeholder="给你的房间起个名字"
+                  value={roomNameInput}
+                  onChange={(e) => setRoomNameInput(e.target.value)}
+                  h="52px"
+                  fontSize="15px"
+                  borderRadius="xl"
+                  bg="rgba(245, 245, 247, 0.8)"
+                  borderColor="rgba(0, 0, 0, 0.08)"
+                  color="gray.900"
+                  _placeholder={{ color: "gray.400" }}
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  _focus={{
+                    borderColor: "primary.500",
+                    bg: "rgba(255, 255, 255, 0.95)",
+                    boxShadow: "0 0 0 4px rgba(10, 132, 255, 0.18)",
+                  }}
+                />
+              </Box>
 
-          <Card bg={boxBg} p={4}>
-            <CardHeader pb={2}>
-              <Heading size="md">房间设置</Heading>
-            </CardHeader>
-            <CardBody>
-              <VStack align="stretch" spacing={3}>
-                <Box>
-                  <Text fontWeight="bold" mb={2}>房间名称</Text>
-                  <Input
-                    placeholder="例如：我的世界房间"
-                    value={roomNameInput}
-                    onChange={(e) => setRoomNameInput(e.target.value)}
-                  />
-                </Box>
-
-                <Box>
-                  <Text fontWeight="bold" mb={2}>网络端口</Text>
-                  <Input
-                    placeholder="25565"
-                    type="number"
-                    value={gamePortInput}
-                    onChange={(e) => setGamePortInput(e.target.value)}
-                  />
-                  <Text fontSize="sm" color="gray.500" mt={1}>
-                    Minecraft 默认端口为 25565
-                  </Text>
-                </Box>
-
-                <Button
-                  colorScheme="blue"
-                  size="lg"
-                  onClick={handleCreateRoom}
-                  isLoading={isCreatingRoom}
-                  isDisabled={!isInstalled || roomNameInput.trim() === ""}
+              <Box>
+                <Text fontSize="13px" color="gray.600" mb={2} fontWeight="600">
+                  游戏端口
+                </Text>
+                <Input
+                  type="number"
+                  placeholder="25565"
+                  value={gamePortInput}
+                  onChange={(e) => setGamePortInput(e.target.value)}
+                  h="52px"
+                  fontSize="15px"
+                  borderRadius="xl"
+                  fontFamily="monospace"
+                  bg="rgba(245, 245, 247, 0.8)"
+                  borderColor="rgba(0, 0, 0, 0.08)"
+                  color="gray.900"
+                  _placeholder={{ color: "gray.400" }}
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  _focus={{
+                    borderColor: "primary.500",
+                    bg: "rgba(255, 255, 255, 0.95)",
+                    boxShadow: "0 0 0 4px rgba(10, 132, 255, 0.18)",
+                  }}
+                />
+                <Text
+                  fontSize="12.5px"
+                  color="gray.500"
+                  mt={2}
+                  lineHeight="1.6"
                 >
-                  创建房间
-                </Button>
-              </VStack>
-            </CardBody>
-          </Card>
-        </VStack>
-      </Section>
+                  Minecraft 默认端口为
+                  25565，在游戏中开启局域网开放后会显示端口号
+                </Text>
+              </Box>
+
+              <Button
+                size="lg"
+                h="56px"
+                fontSize="15px"
+                fontWeight="600"
+                bg="rgba(10, 132, 255, 0.95)"
+                color="white"
+                border="1px solid rgba(255, 255, 255, 0.35)"
+                borderRadius="xl"
+                boxShadow="0 4px 16px rgba(10, 132, 255, 0.28)"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{
+                  bg: "rgba(10, 132, 255, 1)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 8px 24px rgba(10, 132, 255, 0.38)",
+                }}
+                _active={{
+                  transform: "translateY(0)",
+                  boxShadow: "0 2px 8px rgba(10, 132, 255, 0.2)",
+                }}
+                onClick={handleCreateRoom}
+                isLoading={isCreatingRoom}
+                isDisabled={!isInstalled || roomNameInput.trim() === ""}
+                mt={2}
+              >
+                <HStack spacing={2}>
+                  <LuPlus size={20} />
+                  <Text>创建房间</Text>
+                </HStack>
+              </Button>
+            </VStack>
+          </Box>
+        </Center>
+      </Box>
     );
   }
 
+  // 加入房间界面
   if (userRole === "guest") {
     return (
-      <Section title="加入房间" description="输入房间码，加入朋友的房间">
-        <VStack align="stretch" spacing={4}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setUserRole("unselected")}
+      <Box>
+        <PageHeader
+          title="加入房间"
+          subtitle="输入房主提供的房间码加入游戏"
+          onBack={() => setUserRole("unselected")}
+        />
+
+        {!isCheckingInstalling && !isInstalled && <EnvironmentWarning />}
+
+        <Center>
+          <Box
+            w="100%"
+            maxW="520px"
+            bg="rgba(255, 255, 255, 0.65)"
+            border="1px solid rgba(255, 255, 255, 0.75)"
+            borderRadius="2xl"
+            backdropFilter="blur(40px) saturate(200%)"
+            boxShadow="0 12px 48px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(255, 255, 255, 0.6) inset"
+            p={8}
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
           >
-            ← 返回选择
-          </Button>
+            <VStack spacing={6} align="stretch">
+              <Box>
+                <Text fontSize="13px" color="gray.600" mb={2} fontWeight="600">
+                  房间码
+                </Text>
+                <Input
+                  placeholder="输入房间码"
+                  value={roomCodeInput}
+                  onChange={(e) => setRoomCodeInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
+                  h="52px"
+                  fontSize="15px"
+                  borderRadius="xl"
+                  fontFamily="monospace"
+                  letterSpacing="2px"
+                  textTransform="uppercase"
+                  bg="rgba(245, 245, 247, 0.8)"
+                  borderColor="rgba(0, 0, 0, 0.08)"
+                  color="gray.900"
+                  _placeholder={{ color: "gray.400" }}
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                  _focus={{
+                    borderColor: "primary.500",
+                    bg: "rgba(255, 255, 255, 0.95)",
+                    boxShadow: "0 0 0 4px rgba(10, 132, 255, 0.18)",
+                  }}
+                />
+              </Box>
 
-          <Card bg={boxBg} p={4}>
-            <CardHeader pb={2}>
-              <Heading size="md">输入房间码</Heading>
-            </CardHeader>
-            <CardBody>
-              <VStack align="stretch" spacing={3}>
-                <Box>
-                  <Text fontWeight="bold" mb={2}>房间码</Text>
-                  <Input
-                    placeholder="请输入房主提供的房间码"
-                    value={roomCodeInput}
-                    onChange={(e) => setRoomCodeInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
-                  />
-                </Box>
-
-                <Button
-                  colorScheme="green"
-                  size="lg"
-                  onClick={handleJoinRoom}
-                  isLoading={isJoiningRoom}
-                  isDisabled={!isInstalled || roomCodeInput.trim() === ""}
-                >
-                  加入房间
-                </Button>
-              </VStack>
-            </CardBody>
-          </Card>
-        </VStack>
-      </Section>
+              <Button
+                size="lg"
+                h="56px"
+                fontSize="15px"
+                fontWeight="600"
+                bg="rgba(48, 209, 88, 0.95)"
+                color="white"
+                border="1px solid rgba(255, 255, 255, 0.35)"
+                borderRadius="xl"
+                boxShadow="0 4px 16px rgba(48, 209, 88, 0.28)"
+                transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                _hover={{
+                  bg: "rgba(48, 209, 88, 1)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 8px 24px rgba(48, 209, 88, 0.38)",
+                }}
+                _active={{
+                  transform: "translateY(0)",
+                  boxShadow: "0 2px 8px rgba(48, 209, 88, 0.2)",
+                }}
+                onClick={handleJoinRoom}
+                isLoading={isJoiningRoom}
+                isDisabled={!isInstalled || roomCodeInput.trim() === ""}
+                mt={2}
+              >
+                <HStack spacing={2}>
+                  <LuUsers size={20} />
+                  <Text>加入房间</Text>
+                </HStack>
+              </Button>
+            </VStack>
+          </Box>
+        </Center>
+      </Box>
     );
   }
 

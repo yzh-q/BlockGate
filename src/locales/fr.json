@@ -94,7 +94,7 @@
       },
       "modpack": {
         "title": "Importer un modpack",
-        "description": "Importer un modpack depuis un fichier local ou Internet (formats CurseForge, Modrinth ou HMCL)"
+        "description": "Importer un modpack depuis un fichier local ou Internet (formats Modrinth ou HMCL)"
       },
       "manageDirs": {
         "title": "Gérer les répertoires du jeu",
@@ -480,9 +480,17 @@
       "version": "Version",
       "type": "Type"
     },
+    "search": {
+      "placeholder": "Rechercher des versions..."
+    },
     "warning": {
-      "mojang": "Le runtime Java distribué par Mojang sera installé par BlockGate dans un répertoire spécifique.",
-      "oracle": "Le téléchargement à partir de la source Oracle peut nécessiter une connexion."
+      "mojang": "Le runtime Java distribué par Mojang sera installé par BlockGate dans un répertoire spécifique."
+    },
+    "loading": "Récupération des versions disponibles...",
+    "noReleases": "Aucune version trouvée, essayez d'autres filtres",
+    "openWebsite": "Visiter le site {{vendor}}",
+    "error": {
+      "fetchFailed": "Échec de la récupération de la liste des versions"
     }
   },
   "DownloadModpackModal": {
@@ -1090,7 +1098,7 @@
     },
     "step3": {
       "title": "Minecraft, démarre !",
-      "content": "Après avoir sélectionné l'instance et le personnage, et ajusté les paramètres, cliquez sur le bouton de démarrage pour profiter du jeu ! 🥳"
+      "content": "Après avoir sélectionné l'instance et le personnage, et ajusté les paramètres, cliquez sur le bouton de démarrage pour profiter du jeu !"
     }
   },
   "HeadNavBar": {
@@ -1130,10 +1138,6 @@
         "mcMod": {
           "title": "MCMod",
           "description": "Encyclopédie chinoise des mods Minecraft"
-        },
-        "curseforge": {
-          "title": "CurseForge",
-          "description": "Explorez le plus grand dépôt de mods Minecraft au monde"
         }
       }
     },
@@ -1266,8 +1270,8 @@
       "manage": "Aller à management"
     },
     "lastPlayed": {
-      "title": "Dernière partie",
-      "continuePlaying": "Continuer à jouer"
+      "title": "Mondes récents",
+      "quickLaunch": "Lancement rapide"
     },
     "more": {
       "title": "Plus"
@@ -1438,7 +1442,6 @@
       "title": "Test de connectivité des services",
       "offline": "Hors ligne",
       "bmclapi": "BMCLAPI",
-      "curseforge": "CurseForge",
       "modrinth": "Modrinth",
       "mojang": "Mojang",
       "forge": "Forge",
@@ -1486,58 +1489,6 @@
       "search": "Rechercher"
     },
     "modTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Addons": "Addons",
-        "Adventure and RPG": "Aventure RPG",
-        "API and Library": "API et bibliothèque",
-        "Applied Energistics 2": "Applied Energistics 2",
-        "Armor, Tools, and Weapons": "Armures, outils et armes",
-        "Automation": "Automatisation",
-        "Biomes": "Biomes",
-        "Blood Magic": "Blood Magic",
-        "Buildcraft": "Buildcraft",
-        "Bug Fixes": "Corrections de bugs",
-        "Cosmetic": "Cosmétique",
-        "CraftTweaker": "CraftTweaker",
-        "Create": "Create",
-        "Dimensions": "Dimensions",
-        "Education": "Éducation",
-        "Energy": "Énergie",
-        "Energy, Fluid, and Item Transport": "Transport d'énergie, fluide et objets",
-        "Farming": "Agriculture",
-        "Food": "Nourriture",
-        "Forestry": "Foresterie",
-        "Galacticraft": "Galacticraft",
-        "Genetics": "Génétique",
-        "Industrial Craft": "Industrial Craft 2",
-        "Integrated Dynamics": "Integrated Dynamics",
-        "KubeJS": "KubeJS",
-        "Magic": "Magie",
-        "Map and Information": "Carte et informations",
-        "MCreator": "MCreator",
-        "Miscellaneous": "Divers",
-        "Mobs": "Mobs",
-        "Ores and Resources": "Minerais et ressources",
-        "Performance": "Performance",
-        "Player Transport": "Transport de joueur",
-        "Processing": "Traitement",
-        "Redstone": "Redstone",
-        "Server Utility": "Utilitaire serveur",
-        "Skyblock": "Skyblock",
-        "Storage": "Stockage",
-        "Structures": "Structures",
-        "Technology": "Technologie",
-        "Thaumcraft": "Thaumcraft",
-        "Thermal Expansion": "Thermal Expansion",
-        "Tinker's Construct": "Tinker's Construct",
-        "Twilight Forest": "Twilight Forest",
-        "Twitch Integration": "Intégration Twitch",
-        "Utility & QoL": "Utilitaire & QoL",
-        "World Gen": "Génération du monde",
-        "Auxiliary": "Auxiliaire",
-        "World": "Monde"
-      },
       "Modrinth": {
         "All": "Tous",
         "adventure": "Aventure",
@@ -1561,42 +1512,8 @@
         "worldgen": "Génération du monde"
       }
     },
-    "worldTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Types": "Types",
-        "Adventure": "Aventure",
-        "Creation": "Création",
-        "Game Map": "Carte de jeu",
-        "Modded World": "Mods",
-        "Parkour": "Parcours",
-        "Puzzle": "Puzzle",
-        "Survival": "Survie"
-      }
-    },
+    "worldTagList": {},
     "resourcepackTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Resolution": "Résolution",
-        "16x": "16x",
-        "32x": "32x",
-        "64x": "64x",
-        "128x": "128x",
-        "256x": "256x",
-        "512x and Higher": "512x et plus",
-        "Styles": "Styles",
-        "Animated": "Animé",
-        "Special": "Spécial",
-        "Data Packs": "Packs de données",
-        "Font Packs": "Packs de polices",
-        "Medieval": "Médiéval",
-        "Miscellaneous": "Divers",
-        "Mod Support": "Support de mod",
-        "Modern": "Moderne",
-        "Photo Realistic": "Photo réaliste",
-        "Steampunk": "Steampunk",
-        "Traditional": "Traditionnel"
-      },
       "Modrinth": {
         "All": "Tous",
         "Resolution": "Résolution",
@@ -1632,13 +1549,6 @@
       }
     },
     "shaderTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Styles": "Styles",
-        "Fantasy": "Fantaisie",
-        "Realistic": "Réaliste",
-        "Vanilla": "Vanilla"
-      },
       "Modrinth": {
         "All": "Tous",
         "Styles": "Styles",
@@ -1665,27 +1575,6 @@
       }
     },
     "modpackTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Styles": "Styles",
-        "Adventure and RPG": "Aventure RPG",
-        "Combat / PvP": "Combat / PvP",
-        "Exploration": "Exploration",
-        "Extra Large": "Très grand modpack",
-        "FTB Official Pack": "FTB",
-        "Hardcore": "Hardcore",
-        "Horror": "Horreur",
-        "Magic": "Magie",
-        "Map Based": "Basé sur une carte",
-        "Mini Game": "Mini-jeu",
-        "Multiplayer": "Multijoueur",
-        "Quests": "Quêtes",
-        "Sci-Fi": "Science-fiction",
-        "Skyblock": "Skyblock",
-        "Small / Light": "Petit / Léger",
-        "Tech": "Technologie",
-        "Vanilla+": "Version améliorée de l’original"
-      },
       "Modrinth": {
         "All": "Tous",
         "styles": "Styles",
@@ -1702,18 +1591,6 @@
       }
     },
     "datapackTagList": {
-      "CurseForge": {
-        "All": "Tous",
-        "Styles": "Style",
-        "Magic": "Magie",
-        "Miscellaneous": "Divers",
-        "Fantasy": "Fantaisie",
-        "Mod Support": "Prise en charge des mods",
-        "Tech": "Technologie",
-        "Library": "Bibliothèques de support",
-        "Utility": "Pratique",
-        "Adventure": "Aventure."
-      },
       "Modrinth": {
         "All": "Tous",
         "styles": "Style",
@@ -1739,13 +1616,6 @@
       }
     },
     "sortByList": {
-      "CurseForge": {
-        "Popularity": "Popularité",
-        "Latest update": "Dernière mise à jour",
-        "Creation date": "Date de création",
-        "Total downloads": "Téléchargements",
-        "A-Z": "Nom"
-      },
       "Modrinth": {
         "relevance": "Pertinence",
         "downloads": "Téléchargements",
@@ -2466,7 +2336,6 @@
       "shader": "Rechercher des shaders sur {{query}}",
       "datapack": "Rechercher des packs de données sur {{query}}",
       "modpack": "Rechercher des packs de mods sur {{query}}",
-      "curseforge": "Sur CurseForge",
       "modrinth": "Sur Modrinth"
     },
     "result": {
@@ -2474,7 +2343,6 @@
       "recentViewed": "Récemment visité",
       "instance": "Les exemples",
       "player": "Les rôles",
-      "curseforge": "Rechercher sur CurseForge",
       "modrinth": "Rechercher sur Modrinth"
     }
   },

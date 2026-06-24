@@ -359,7 +359,15 @@ export const InstanceLastPlayedWidget = () => {
     getWorldListWrapper();
   }, [getWorldListWrapper]);
 
-  const lastPlayedWorld = localWorlds[0];
+  // Show up to 3 most recent worlds
+  const recentWorlds = localWorlds.slice(0, 3);
+
+  const handleQuickLaunch = (worldName: string) => {
+    openSharedModal("launch", {
+      instanceId: summary?.id,
+      quickPlaySingleplayer: worldName,
+    });
+  };
 
   return (
     <InstanceWidgetBase
@@ -370,65 +378,58 @@ export const InstanceLastPlayedWidget = () => {
         <Center mt={4}>
           <BeatLoader size={8} color="gray" />
         </Center>
-      ) : lastPlayedWorld ? (
-        <VStack spacing={3} alignItems="flex-start" w="full" zIndex={998}>
-          <HStack spacing={3} w="full" alignItems="center">
-            <Image
-              src={convertFileSrc(lastPlayedWorld.iconSrc)}
-              fallbackSrc="/images/icons/UnknownWorld.webp"
-              alt={lastPlayedWorld.name}
-              boxSize="28px"
-              borderRadius="4px"
-            />
-            <Box flex="1" minW={0}>
-              <VStack spacing={0} alignItems="start" w="full">
-                <Text fontSize="xs-sm" w="full" isTruncated>
-                  {lastPlayedWorld.name}
+      ) : recentWorlds.length > 0 ? (
+        <VStack
+          spacing={2}
+          alignItems="flex-start"
+          w="full"
+          h="full"
+          overflow="auto"
+        >
+          {recentWorlds.map((world, index) => (
+            <HStack
+              key={world.name}
+              spacing={2}
+              w="full"
+              alignItems="center"
+              p={1}
+              borderRadius="md"
+              _hover={{ bg: "whiteAlpha.100" }}
+              transition="background 0.2s"
+            >
+              <Image
+                src={convertFileSrc(world.iconSrc)}
+                fallbackSrc="/images/icons/UnknownWorld.webp"
+                alt={world.name}
+                boxSize="24px"
+                borderRadius="4px"
+              />
+              <Box flex="1" minW={0}>
+                <Text fontSize="xs-sm" w="full" isTruncated title={world.name}>
+                  {world.name}
                 </Text>
                 <Text className="secondary-text" fontSize="xs">
                   {formatRelativeTime(
-                    UNIXToISOString(lastPlayedWorld.lastPlayedAt),
+                    UNIXToISOString(world.lastPlayedAt),
                     t
                   ).replace("on", "")}
                 </Text>
-                <Text className="secondary-text" fontSize="xs">
-                  {t(
-                    `InstanceWorldsPage.worldList.gamemode.${lastPlayedWorld.gamemode}`
-                  )}
-                </Text>
-                {lastPlayedWorld.difficulty && (
-                  <Text className="secondary-text" fontSize="xs">
-                    {t(
-                      `InstanceWorldsPage.worldList.difficulty.${lastPlayedWorld.difficulty}`
-                    )}
-                  </Text>
-                )}
-              </VStack>
-            </Box>
-          </HStack>
-          {summary?.supportQuickPlay && (
-            <HStack spacing={1.5} position="absolute" left={2} bottom={2}>
-              <Button
-                size="xs"
-                variant="ghost"
-                colorScheme={primaryColor}
-                justifyContent="flex-start"
-                onClick={() => {
-                  openSharedModal("launch", {
-                    instanceId: summary?.id,
-                    ...(lastPlayedWorld?.name && {
-                      quickPlaySingleplayer: lastPlayedWorld.name,
-                    }),
-                  });
-                }}
-              >
-                <HStack spacing={1.5}>
-                  <Icon as={LuArrowRight} />
-                  <Text>{t("InstanceWidgets.lastPlayed.continuePlaying")}</Text>
-                </HStack>
-              </Button>
+              </Box>
+              {summary?.supportQuickPlay && (
+                <Tooltip label={t("InstanceWidgets.lastPlayed.quickLaunch")}>
+                  <IconButton
+                    aria-label="quick launch"
+                    icon={<LuArrowRight />}
+                    size="xs"
+                    variant="ghost"
+                    colorScheme={primaryColor}
+                    onClick={() => handleQuickLaunch(world.name)}
+                  />
+                </Tooltip>
+              )}
             </HStack>
-          )}
+          ))}
+          {recentWorlds.length === 0 && <Empty withIcon={false} size="sm" />}
         </VStack>
       ) : (
         <Empty withIcon={false} size="sm" />

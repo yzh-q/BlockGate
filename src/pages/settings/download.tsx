@@ -72,7 +72,12 @@ const DownloadSettingsPage = () => {
   const [isClearingDownloadCache, setIsClearingDownloadCache] =
     useState<boolean>(false);
 
-  const sourceStrategyTypes = ["auto", "official", "mirror", "fastMinecraftMirror"];
+  const sourceStrategyTypes = [
+    "auto",
+    "official",
+    "mirror",
+    "fastMinecraftMirror",
+  ];
   const proxyTypeOptions = [
     {
       label: "HTTP",

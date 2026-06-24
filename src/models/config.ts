@@ -77,17 +77,11 @@ export interface LauncherConfig {
     theme: {
       primaryColor: string;
       colorMode: "light" | "dark" | "system";
-      useLiquidGlassDesign: boolean;
       headNavStyle: string;
     };
     font: {
       fontFamily: string;
       fontSize: number;
-    };
-    background: {
-      choice: string;
-      randomCustom: boolean;
-      autoDarken: boolean;
     };
     accessibility: {
       invertColors: boolean;
@@ -232,17 +226,11 @@ export const defaultConfig: LauncherConfig = {
     theme: {
       primaryColor: "blue",
       colorMode: "light",
-      useLiquidGlassDesign: false,
       headNavStyle: "standard",
     },
     font: {
       fontFamily: "%built-in",
       fontSize: 100,
-    },
-    background: {
-      choice: "%built-in:Jokull",
-      randomCustom: false,
-      autoDarken: true,
     },
     accessibility: {
       invertColors: false,
