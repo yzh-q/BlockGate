@@ -526,9 +526,6 @@
     "download": {
       "title": "下載",
       "settings": {
-        "autoConcurrent": {
-          "title": "自動選擇併發數"
-        },
         "concurrentCount": {
           "title": "併發數"
         },

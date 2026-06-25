@@ -47,11 +47,7 @@ impl TaskMonitor {
       ths: RwLock::new(HashMap::new()),
       tasks: Arc::new(Mutex::new(HashMap::new())),
       concurrency: Arc::new(Semaphore::new(
-        if config.download.transmission.auto_concurrent {
-          std::thread::available_parallelism().unwrap().into()
-        } else {
-          config.download.transmission.concurrent_count
-        },
+        config.download.transmission.concurrent_count,
       )),
       tx,
       rx,

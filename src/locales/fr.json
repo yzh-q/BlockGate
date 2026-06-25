@@ -526,9 +526,6 @@
     "download": {
       "title": "Téléchargement",
       "settings": {
-        "autoConcurrent": {
-          "title": "Sélection automatique du nombre de téléchargements simultanés"
-        },
         "concurrentCount": {
           "title": "Nombre de téléchargements simultanés"
         },

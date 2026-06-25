@@ -93,7 +93,6 @@ export interface LauncherConfig {
       strategy: string;
     };
     transmission: {
-      autoConcurrent: boolean;
       concurrentCount: number;
       enableSpeedLimit: boolean;
       speedLimitValue: number;
@@ -242,7 +241,6 @@ export const defaultConfig: LauncherConfig = {
       strategy: "auto",
     },
     transmission: {
-      autoConcurrent: true,
       concurrentCount: 64,
       enableSpeedLimit: false,
       speedLimitValue: 1024,

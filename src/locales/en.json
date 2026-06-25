@@ -600,9 +600,6 @@
     "download": {
       "title": "Download",
       "settings": {
-        "autoConcurrent": {
-          "title": "Auto Select the Number of Concurrent Threads"
-        },
         "concurrentCount": {
           "title": "Concurrent Thread Count"
         },

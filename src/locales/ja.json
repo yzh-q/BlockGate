@@ -526,9 +526,6 @@
     "download": {
       "title": "ダウンロード",
       "settings": {
-        "autoConcurrent": {
-          "title": "同時接続数スマート選択"
-        },
         "concurrentCount": {
           "title": "同時接続数"
         },

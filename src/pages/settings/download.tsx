@@ -175,86 +175,65 @@ const DownloadSettingsPage = () => {
       items: [
         {
           title: t(
-            "DownloadSettingPage.download.settings.autoConcurrent.title"
+            "DownloadSettingPage.download.settings.concurrentCount.title"
           ),
           children: (
-            <Switch
-              colorScheme={primaryColor}
-              isChecked={downloadConfigs.transmission.autoConcurrent}
-              onChange={(event) => {
-                update(
-                  "download.transmission.autoConcurrent",
-                  event.target.checked
-                );
-              }}
-            />
+            <HStack spacing={4}>
+              <Slider
+                min={1}
+                max={128}
+                step={1}
+                w={32}
+                colorScheme={primaryColor}
+                value={sliderConcurrentCount}
+                onChange={(value) => {
+                  setSliderConcurrentCount(value);
+                  setConcurrentCount(value);
+                }}
+                onBlur={() => {
+                  update(
+                    "download.transmission.concurrentCount",
+                    concurrentCount
+                  );
+                }}
+              >
+                <SliderTrack>
+                  <SliderFilledTrack />
+                </SliderTrack>
+                <SliderThumb />
+              </Slider>
+              <NumberInput
+                min={1}
+                max={128}
+                size="xs"
+                maxW={16}
+                focusBorderColor={`${primaryColor}.500`}
+                value={concurrentCount}
+                onChange={(value) => {
+                  if (!/^\d*$/.test(value)) return;
+                  setConcurrentCount(Number(value));
+                }}
+                onBlur={() => {
+                  setSliderConcurrentCount(concurrentCount);
+                  update(
+                    "download.transmission.concurrentCount",
+                    Math.max(1, Math.min(concurrentCount, 128))
+                  );
+                }}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper>
+                    <LuChevronUp size={8} />
+                  </NumberIncrementStepper>
+                  <NumberDecrementStepper>
+                    <LuChevronDown size={8} />
+                  </NumberDecrementStepper>
+                </NumberInputStepper>
+              </NumberInput>
+            </HStack>
           ),
         },
-        ...(downloadConfigs.transmission.autoConcurrent
-          ? []
-          : [
-              {
-                title: t(
-                  "DownloadSettingPage.download.settings.concurrentCount.title"
-                ),
-                children: (
-                  <HStack spacing={4}>
-                    <Slider
-                      min={1}
-                      max={128}
-                      step={1}
-                      w={32}
-                      colorScheme={primaryColor}
-                      value={sliderConcurrentCount}
-                      onChange={(value) => {
-                        setSliderConcurrentCount(value);
-                        setConcurrentCount(value);
-                      }}
-                      onBlur={() => {
-                        update(
-                          "download.transmission.concurrentCount",
-                          concurrentCount
-                        );
-                      }}
-                    >
-                      <SliderTrack>
-                        <SliderFilledTrack />
-                      </SliderTrack>
-                      <SliderThumb />
-                    </Slider>
-                    <NumberInput
-                      min={1}
-                      max={128}
-                      size="xs"
-                      maxW={16}
-                      focusBorderColor={`${primaryColor}.500`}
-                      value={concurrentCount}
-                      onChange={(value) => {
-                        if (!/^\d*$/.test(value)) return;
-                        setConcurrentCount(Number(value));
-                      }}
-                      onBlur={() => {
-                        setSliderConcurrentCount(concurrentCount);
-                        update(
-                          "download.transmission.concurrentCount",
-                          Math.max(1, Math.min(concurrentCount, 128))
-                        );
-                      }}
-                    >
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper>
-                          <LuChevronUp size={8} />
-                        </NumberIncrementStepper>
-                        <NumberDecrementStepper>
-                          <LuChevronDown size={8} />
-                        </NumberDecrementStepper>
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </HStack>
-                ),
-              },
-            ]),
         {
           title: t(
             "DownloadSettingPage.download.settings.enableSpeedLimit.title"

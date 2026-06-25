@@ -220,8 +220,6 @@ structstruck::strike! {
         pub strategy: String,
       },
       pub transmission: struct {
-        #[default = true]
-        pub auto_concurrent: bool,
         #[default = 64]
         pub concurrent_count: usize,
         #[default = false]
