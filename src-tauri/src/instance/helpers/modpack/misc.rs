@@ -84,18 +84,25 @@ pub struct ModpackMetaInfo {
 
 impl ModpackMetaInfo {
   pub async fn from_archive(app: &AppHandle, file: &File) -> SJMCLResult<Self> {
+    log::info!(
+      "Trying to parse modpack archive with {} parsers",
+      get_parsers().len()
+    );
     for (idx, parser) in get_parsers().into_iter().enumerate() {
       match parser(file) {
         Ok(manifest) => {
-          log::debug!("Parser {} succeeded", idx);
-          return manifest.get_meta_info(app).await;
+          log::info!("Parser {} succeeded, getting meta info...", idx);
+          return manifest.get_meta_info(app).await.inspect_err(|e| {
+            log::error!("Parser {} failed to get meta info: {:?}", idx, e);
+          });
         }
         Err(e) => {
-          log::debug!("Parser {} failed: {:?}", idx, e);
+          log::info!("Parser {} failed: {:?}", idx, e);
         }
       }
     }
 
+    log::error!("All parsers failed to parse modpack archive");
     Err(InstanceError::ModpackManifestParseError.into())
   }
 }

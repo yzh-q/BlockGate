@@ -90,36 +90,36 @@ fn find_manifest_in_archive<R: std::io::Read + std::io::Seek>(
 impl ModpackManifest for CurseForgeManifest {
   fn from_archive(file: &File) -> SJMCLResult<Self> {
     let mut archive = ZipArchive::new(file)?;
-    log::debug!("Zip archive has {} files", archive.len());
+    log::info!("[CurseForge] Zip archive has {} files", archive.len());
 
     let manifest_path = find_manifest_in_archive(&mut archive);
     let manifest_path = match manifest_path {
       Some(p) => p,
       None => {
-        log::debug!("manifest.json not found in archive, listing files:");
+        log::info!("[CurseForge] manifest.json not found in archive, listing files:");
         for i in 0..archive.len() {
           if let Ok(file) = archive.by_index(i) {
-            log::debug!("  - {}", file.name());
+            log::info!("[CurseForge]   - {}", file.name());
           }
         }
         return Err(InstanceError::ModpackManifestParseError.into());
       }
     };
-    log::debug!("Found manifest.json at: {}", manifest_path);
+    log::info!("[CurseForge] Found manifest.json at: {}", manifest_path);
 
     let mut manifest_file = archive.by_name(&manifest_path)?;
     let mut manifest_content = String::new();
     manifest_file.read_to_string(&mut manifest_content)?;
-    log::debug!("manifest.json content: {}", manifest_content);
+    log::info!("[CurseForge] manifest.json content: {}", manifest_content);
 
     let manifest: CurseForgeManifest =
       serde_json::from_str(&manifest_content).inspect_err(|e| {
-        log::error!("Failed to parse CurseForge manifest.json: {:?}", e);
+        log::error!("[CurseForge] Failed to parse manifest.json: {:?}", e);
       })?;
 
     if manifest.manifest_type != "minecraftModpack" {
       log::error!(
-        "Invalid manifest type: {}, expected minecraftModpack",
+        "[CurseForge] Invalid manifest type: {}, expected minecraftModpack",
         manifest.manifest_type
       );
       return Err(InstanceError::ModpackManifestParseError.into());
@@ -130,7 +130,7 @@ impl ModpackManifest for CurseForgeManifest {
     } else {
       "overrides/".to_string()
     };
-    log::debug!("Overrides path: {}", overrides_path);
+    log::info!("[CurseForge] Overrides path: {}", overrides_path);
 
     Ok(CurseForgeManifest {
       overrides_path,
@@ -139,20 +139,37 @@ impl ModpackManifest for CurseForgeManifest {
   }
 
   async fn get_meta_info(&self, app: &AppHandle) -> SJMCLResult<ModpackMetaInfo> {
+    log::info!("[CurseForge] Getting meta info for modpack: {}", self.name);
     let client_version = self.get_client_version()?;
-    let mod_loader = if let Ok((loader_type, version)) = self.get_mod_loader_type_version() {
-      Some(
-        ModLoader {
+    log::info!("[CurseForge] Client version: {}", client_version);
+
+    let mod_loader_result = self.get_mod_loader_type_version();
+    let mod_loader = match mod_loader_result {
+      Ok((loader_type, version)) => {
+        log::info!(
+          "[CurseForge] Mod loader: {:?} version: {}",
+          loader_type,
+          version
+        );
+        let loader = ModLoader {
           loader_type,
           version,
           ..Default::default()
+        };
+        match loader.with_branch(app, client_version.clone()).await {
+          Ok(l) => Some(l),
+          Err(e) => {
+            log::error!("[CurseForge] Failed to get mod loader branch: {:?}", e);
+            return Err(e);
+          }
         }
-        .with_branch(app, client_version.clone())
-        .await?,
-      )
-    } else {
-      None
+      }
+      Err(e) => {
+        log::warn!("[CurseForge] No mod loader found: {:?}", e);
+        None
+      }
     };
+
     Ok(ModpackMetaInfo {
       name: self.name.clone(),
       version: self.version.clone(),

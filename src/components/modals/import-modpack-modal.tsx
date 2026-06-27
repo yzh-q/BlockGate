@@ -1,4 +1,4 @@
-﻿import {
+import {
   Button,
   Center,
   HStack,
@@ -251,9 +251,12 @@ const ImportModpackModal: React.FC<ImportModpackModalProps> = ({
   ]);
 
   useEffect(() => {
+    if (!path) return;
+    let cancelled = false;
     setIsPageLoading(true);
     InstanceService.retrieveModpackMetaInfo(path)
       .then((response) => {
+        if (cancelled) return;
         if (response.status === "success") {
           setModpack(response.data);
           setName(sanitizeFileName(response.data.name));
@@ -273,12 +276,18 @@ const ImportModpackModal: React.FC<ImportModpackModalProps> = ({
         }
       })
       .catch((error) => {
+        if (cancelled) return;
         logger.error("Error fetching modpack info:", error);
       })
       .finally(() => {
-        setIsPageLoading(false);
+        if (!cancelled) {
+          setIsPageLoading(false);
+        }
       });
-  }, [path, toast, onClose]);
+    return () => {
+      cancelled = true;
+    };
+  }, [path]);
 
   return (
     <Modal
