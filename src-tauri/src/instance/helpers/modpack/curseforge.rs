@@ -14,30 +14,32 @@ use crate::resource::models::OtherResourceSource;
 use crate::tasks::PTaskParam;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct CurseForgeModLoader {
   pub id: String,
-  pub primary: bool,
+  #[serde(rename = "primary")]
+  pub is_primary: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct CurseForgeMinecraft {
   pub version: String,
+  #[serde(rename = "modLoaders")]
   pub mod_loaders: Vec<CurseForgeModLoader>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct CurseForgeFile {
+  #[serde(rename = "projectID")]
   pub project_id: u32,
+  #[serde(rename = "fileID")]
   pub file_id: u32,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct CurseForgeManifest {
+  #[serde(rename = "manifestType")]
   pub manifest_type: String,
+  #[serde(rename = "manifestVersion")]
   pub manifest_version: u32,
   pub name: String,
   pub version: String,
@@ -115,7 +117,7 @@ impl ModpackManifest for CurseForgeManifest {
 
   fn get_mod_loader_type_version(&self) -> SJMCLResult<(ModLoaderType, String)> {
     for loader in &self.minecraft.mod_loaders {
-      if loader.primary {
+      if loader.is_primary {
         return Self::parse_mod_loader(&loader.id);
       }
     }
