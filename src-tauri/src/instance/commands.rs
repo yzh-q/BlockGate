@@ -58,6 +58,7 @@ use tauri_plugin_http::reqwest;
 use tokio;
 use tokio::sync::Semaphore;
 use url::Url;
+use urlencoding;
 use zip::read::ZipArchive;
 
 #[tauri::command]
@@ -986,8 +987,17 @@ pub async fn create_instance(
 
   // If modpack path is provided, install it
   if let Some(modpack_path) = modpack_path {
-    let path = PathBuf::from(modpack_path);
-    let file = fs::File::open(&path).map_err(|_| InstanceError::FileNotFoundError)?;
+    let decoded_path = decode_path(&modpack_path);
+    let path = PathBuf::from(&decoded_path);
+    log::info!("[Instance] Opening modpack file: {}", decoded_path);
+    let file = fs::File::open(&path).map_err(|e| {
+      log::error!(
+        "[Instance] Failed to open modpack file '{}': {:?}",
+        decoded_path,
+        e
+      );
+      InstanceError::FileNotFoundError
+    })?;
     task_params.extend(get_download_params(&app, &file, &version_path).await?);
     extract_overrides(&file, &version_path)?;
   }
@@ -1230,13 +1240,38 @@ pub async fn change_mod_loader(
   Ok(())
 }
 
+fn decode_path(path: &str) -> String {
+  // 检查是否包含 URL 编码字符
+  if path.contains('%') {
+    // 尝试解码 URL 编码的路径
+    match urlencoding::decode(path) {
+      Ok(decoded) => {
+        let result = decoded.into_owned();
+        log::info!("[Path] Decoded URL-encoded path: {} -> {}", path, result);
+        result
+      }
+      Err(e) => {
+        log::warn!("[Path] Failed to decode path '{}': {:?}", path, e);
+        path.to_string()
+      }
+    }
+  } else {
+    path.to_string()
+  }
+}
+
 #[tauri::command]
 pub async fn retrieve_modpack_meta_info(
   app: AppHandle,
   path: String,
 ) -> SJMCLResult<ModpackMetaInfo> {
-  let path = PathBuf::from(path);
-  let file = fs::File::open(&path).map_err(|_| InstanceError::FileNotFoundError)?;
+  let decoded_path = decode_path(&path);
+  let path = PathBuf::from(&decoded_path);
+  log::info!("[Modpack] Opening modpack file: {}", decoded_path);
+  let file = fs::File::open(&path).map_err(|e| {
+    log::error!("[Modpack] Failed to open file '{}': {:?}", decoded_path, e);
+    InstanceError::FileNotFoundError
+  })?;
   ModpackMetaInfo::from_archive(&app, &file).await
 }
 
