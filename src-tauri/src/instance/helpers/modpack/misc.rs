@@ -84,9 +84,15 @@ pub struct ModpackMetaInfo {
 
 impl ModpackMetaInfo {
   pub async fn from_archive(app: &AppHandle, file: &File) -> SJMCLResult<Self> {
-    for parser in get_parsers() {
-      if let Ok(manifest) = parser(file) {
-        return manifest.get_meta_info(app).await;
+    for (idx, parser) in get_parsers().into_iter().enumerate() {
+      match parser(file) {
+        Ok(manifest) => {
+          log::debug!("Parser {} succeeded", idx);
+          return manifest.get_meta_info(app).await;
+        }
+        Err(e) => {
+          log::debug!("Parser {} failed: {:?}", idx, e);
+        }
       }
     }
 
@@ -99,9 +105,15 @@ pub async fn get_download_params(
   file: &File,
   instance_path: &Path,
 ) -> SJMCLResult<Vec<PTaskParam>> {
-  for parser in get_parsers() {
-    if let Ok(manifest) = parser(file) {
-      return manifest.get_download_params(app, instance_path).await;
+  for (idx, parser) in get_parsers().into_iter().enumerate() {
+    match parser(file) {
+      Ok(manifest) => {
+        log::debug!("Parser {} succeeded for download params", idx);
+        return manifest.get_download_params(app, instance_path).await;
+      }
+      Err(e) => {
+        log::debug!("Parser {} failed for download params: {:?}", idx, e);
+      }
     }
   }
 
