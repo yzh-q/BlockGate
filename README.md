@@ -2,7 +2,7 @@
 
 # BlockGate
 
-![BlockGate](https://img.shields.io/badge/version-1.2.6-blue)
+![BlockGate](https://img.shields.io/badge/version-1.2.7-blue)
 ![License](https://img.shields.io/badge/license-GPLv3-green)
 ![Tauri](https://img.shields.io/badge/Tauri-2.x-purple)
 ![React](https://img.shields.io/badge/React-18-blue)
